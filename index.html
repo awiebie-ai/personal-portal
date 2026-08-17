@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manuel Fernandez</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+
+    <p class="brand">Juniebie</p>
+    <h1 class="name">Manuel Fernandez</h1>
+
+    <div class="hero">
+      <img class="hero-bg" id="heroImage" alt="">
+      <div class="hero-overlay"></div>
+      <div class="hero-top">
+        <div class="hero-logo">Featured Project</div>
+        <div class="hero-menu"><span></span><span></span><span></span></div>
+      </div>
+      <div class="hero-caption" id="heroCaption">A rotating showcase of current work — swap this banner per project.</div>
+    </div>
+
+    <div class="grid">
+
+      <div class="card card-news">
+        <div class="news-header">
+          <div>
+            <p class="news-eyebrow">Top Stories</p>
+            <h3 class="news-title">Today's U.S. Headlines</h3>
+          </div>
+          <div class="news-toggler">
+            <button class="news-nav-btn" id="newsPrev" type="button" aria-label="Previous headline" disabled>‹</button>
+            <span class="news-counter" id="newsCounter">–</span>
+            <button class="news-nav-btn" id="newsNext" type="button" aria-label="Next headline" disabled>›</button>
+          </div>
+        </div>
+        <div class="news-list" id="newsList">
+          <p class="news-loading">Loading today's headlines…</p>
+        </div>
+      </div>
+
+      <div class="card card-press">
+        <div class="press-logo"><span>Weekly</span><span class="dot">Digest</span></div>
+        <p class="press-sub">The Developer Blog</p>
+        <p class="press-breadcrumb">API Directory &gt; Video &gt; <span>Example API</span></p>
+        <div class="press-banner">SAMPLE VIDEO API</div>
+        <p class="press-caption">API Developer's Toolkit</p>
+      </div>
+
+      <div class="card card-product">
+        <div>
+          <p class="product-eyebrow">Case Study</p>
+          <h3 class="product-title">Power your app with sample scheduling data.</h3>
+        </div>
+        <div class="product-app">
+          <div class="product-app-header"><span>August</span><span>2026</span></div>
+          <div class="product-app-grid">
+            <div></div><div></div><div class="hi"></div><div></div><div></div><div></div><div></div>
+            <div></div><div class="hi"></div><div></div><div></div><div></div><div></div><div></div>
+            <div></div><div></div><div></div><div class="hi"></div><div></div><div></div><div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-split">
+        <div class="split-half light">
+          <div class="split-icon"></div>
+          <p class="split-title">Voice Assistant SDK</p>
+          <p class="split-text">Build for voice with sample tools and shortcuts. Placeholder integration example.</p>
+        </div>
+        <div class="split-half accent">
+          <div class="split-icon"></div>
+          <p class="split-title">Accessibility SDK</p>
+          <p class="split-text">Integrate sample recognition features directly into your app or software.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

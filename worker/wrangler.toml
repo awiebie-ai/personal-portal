@@ -1,0 +1,13 @@
+name = "portfolio-headlines"
+main = "src/worker.js"
+compatibility_date = "2024-01-01"
+
+# Runs once a day at 12:00 UTC. Adjust the cron expression to taste
+# (e.g. "0 */6 * * *" for every 6 hours).
+[triggers]
+crons = ["0 12 * * *"]
+
+# Created via: wrangler kv namespace create HEADLINES_KV
+[[kv_namespaces]]
+binding = "HEADLINES_KV"
+id = "8068760f7a654443a15a12c51dee91dd"
