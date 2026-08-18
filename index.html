@@ -41,12 +41,24 @@
         </div>
       </div>
 
-      <div class="card card-press">
-        <div class="press-logo"><span>Weekly</span><span class="dot">Digest</span></div>
-        <p class="press-sub">The Developer Blog</p>
-        <p class="press-breadcrumb">API Directory &gt; Video &gt; <span>Example API</span></p>
-        <div class="press-banner">SAMPLE VIDEO API</div>
-        <p class="press-caption">API Developer's Toolkit</p>
+      <div class="card card-github">
+        <div class="github-header">
+          <div class="github-header-left">
+            <svg class="github-mark" viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="1.5" width="12" height="13" rx="1.5"></rect><line x1="5.5" y1="1.5" x2="5.5" y2="14.5"></line></svg>
+            <div>
+              <p class="github-eyebrow">GitHub</p>
+              <h3 class="github-title">Repository Activity</h3>
+            </div>
+          </div>
+          <div class="github-toggler">
+            <button class="github-nav-btn" id="githubPrev" type="button" aria-label="Previous repository" disabled>‹</button>
+            <span class="github-counter" id="githubCounter">–</span>
+            <button class="github-nav-btn" id="githubNext" type="button" aria-label="Next repository" disabled>›</button>
+          </div>
+        </div>
+        <div class="github-list" id="githubList">
+          <p class="github-loading">Loading repository activity…</p>
+        </div>
       </div>
 
       <div class="card card-product">

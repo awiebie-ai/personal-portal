@@ -11,6 +11,31 @@ const CANDIDATES_PER_FEED = 5; // pull extras so filtering/dedup can still hit H
 const KV_KEY = 'headlines';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
+// Fixed, ordered list so the portfolio always leads with this project.
+// Repos are private, so this must stay server-side behind GITHUB_TOKEN.
+const GITHUB_REPOS = [
+  { owner: 'awiebie-ai', repo: 'personal-portal' },
+  { owner: 'awiebie-ai', repo: 'prompt-eng-interactive-tutorial' }
+];
+
+const LANGUAGE_COLORS = {
+  JavaScript: '#f1e05a',
+  TypeScript: '#3178c6',
+  Python: '#3572A5',
+  HTML: '#e34c26',
+  CSS: '#563d7c',
+  Shell: '#89e051',
+  'Jupyter Notebook': '#DA5B0B',
+  Go: '#00ADD8',
+  Rust: '#dea584',
+  Java: '#b07219',
+  Ruby: '#701516',
+  PHP: '#4F5D95',
+  'C++': '#f34b7d',
+  C: '#555555',
+  'C#': '#178600'
+};
+
 // Phrases that show up when a site blocks non-browser fetches instead of
 // serving the article (paywalls, bot checks). Treated as "no article text".
 const BLOCK_PATTERNS = /enable (javascript|js)|disable.*ad ?blocker|subscribe to (read|continue)|sign in to (read|continue)|create a free account/i;
@@ -32,6 +57,11 @@ export default {
       await refreshHeadlines(env);
       const fresh = await env.HEADLINES_KV.get(KV_KEY, 'json');
       return jsonResponse(fresh, 200);
+    }
+
+    if (url.pathname === '/github') {
+      const items = await fetchGithubRepos(env);
+      return jsonResponse({ status: 'ok', items }, 200);
     }
 
     const cached = await env.HEADLINES_KV.get(KV_KEY, 'json');
@@ -97,6 +127,54 @@ async function refreshHeadlines(env) {
     updatedAt: new Date().toISOString(),
     items: summarized
   }));
+}
+
+async function fetchGithubRepos(env) {
+  const headers = {
+    Authorization: 'Bearer ' + env.GITHUB_TOKEN,
+    Accept: 'application/vnd.github+json',
+    'User-Agent': 'personal-portal-worker',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+
+  const results = [];
+  for (const { owner, repo } of GITHUB_REPOS) {
+    try {
+      const [repoRes, commitsRes] = await Promise.all([
+        fetch('https://api.github.com/repos/' + owner + '/' + repo, { headers }),
+        fetch('https://api.github.com/repos/' + owner + '/' + repo + '/commits?per_page=1', { headers })
+      ]);
+      if (!repoRes.ok) throw new Error('repo fetch failed: ' + repoRes.status);
+      const repoData = await repoRes.json();
+
+      let latestCommit = null;
+      if (commitsRes.ok) {
+        const commits = await commitsRes.json();
+        if (Array.isArray(commits) && commits[0]) {
+          latestCommit = {
+            message: commits[0].commit.message.split('\n')[0],
+            date: commits[0].commit.committer.date
+          };
+        }
+      }
+
+      results.push({
+        name: repoData.name,
+        fullName: repoData.full_name,
+        description: repoData.description || '',
+        url: repoData.html_url,
+        language: repoData.language,
+        languageColor: LANGUAGE_COLORS[repoData.language] || '#8b949e',
+        visibility: repoData.private ? 'Private' : 'Public',
+        openIssues: repoData.open_issues_count,
+        updatedAt: repoData.pushed_at,
+        latestCommit
+      });
+    } catch (err) {
+      console.error('github fetch failed', owner, repo, err);
+    }
+  }
+  return results;
 }
 
 function dedupeByTitle(items) {
