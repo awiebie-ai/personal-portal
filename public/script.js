@@ -219,3 +219,182 @@
       githubList.innerHTML = '<p class="github-error">GitHub activity unavailable right now — check back later.</p>';
     });
 })();
+
+(function () {
+  var body = document.getElementById('agendaBody');
+  var eyebrow = document.getElementById('agendaEyebrow');
+  var title = document.getElementById('agendaTitle');
+  var prevBtn = document.getElementById('agendaPrev');
+  var nextBtn = document.getElementById('agendaNext');
+  var counter = document.getElementById('agendaCounter');
+  // Same Cloudflare Worker, /todoist and /calendar routes. Todoist token and
+  // the Fastmail .ics URL (itself a bearer secret) stay server-side.
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+  var views = [];
+  var index = 0;
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function parseDateOnly(str) {
+    var parts = str.split('-');
+    return new Date(+parts[0], +parts[1] - 1, +parts[2]);
+  }
+
+  function startOfDay(d) {
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  }
+
+  function dayLabel(date) {
+    var diff = Math.round((startOfDay(date) - startOfDay(new Date())) / 86400000);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return date.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function dueInfo(due) {
+    if (!due) return null;
+    var dueDate = due.datetime ? new Date(due.datetime) : parseDateOnly(due.date);
+    var diffDays = Math.round((startOfDay(dueDate) - startOfDay(new Date())) / 86400000);
+    var overdue = due.datetime ? dueDate < new Date() : diffDays < 0;
+    var label;
+    if (overdue) label = 'Overdue';
+    else if (diffDays === 0) label = due.datetime ? dueDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'Today';
+    else if (diffDays === 1) label = 'Tomorrow';
+    else label = dueDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    return { label: label, overdue: overdue, today: diffDays === 0 && !overdue };
+  }
+
+  function renderTodoist(items) {
+    if (!items.length) {
+      body.innerHTML = '<p class="agenda-loading">Nothing on your Todoist list — you\'re all caught up.</p>';
+      return;
+    }
+
+    var overdueCount = 0, todayCount = 0;
+    items.forEach(function (item) {
+      var info = dueInfo(item.due);
+      if (info && info.overdue) overdueCount += 1;
+      if (info && info.today) todayCount += 1;
+    });
+
+    var html = '<div class="todoist-stats">';
+    if (overdueCount) html += '<span class="todoist-stat">' + overdueCount + ' overdue</span>';
+    if (todayCount) html += '<span class="todoist-stat' + (overdueCount ? ' is-muted' : '') + '">' + todayCount + ' due today</span>';
+    if (!overdueCount && !todayCount) html += '<span class="todoist-stat is-muted">All caught up</span>';
+    html += '</div><div class="todoist-list">';
+
+    items.forEach(function (item) {
+      var info = dueInfo(item.due);
+      html += '<div class="todoist-task">' +
+        '<span class="todoist-checkbox" style="color:' + item.priorityColor + '"></span>' +
+        '<span class="todoist-content">' + escapeHtml(item.content) + '</span>' +
+        (item.project ? '<span class="todoist-project">' + escapeHtml(item.project.name) + '</span>' : '') +
+        (info ? '<span class="todoist-due' + (info.overdue ? ' is-overdue' : info.today ? ' is-today' : '') + '">' + info.label + '</span>' : '') +
+        '</div>';
+    });
+
+    html += '</div><div class="todoist-footer"><a href="https://todoist.com/app" target="_blank" rel="noopener">Open Todoist →</a></div>';
+    body.innerHTML = html;
+  }
+
+  function timeLabel(startIso, endIso, allDay) {
+    if (allDay) return 'All day';
+    var opts = { hour: 'numeric', minute: '2-digit' };
+    return new Date(startIso).toLocaleTimeString([], opts) + ' – ' + new Date(endIso).toLocaleTimeString([], opts);
+  }
+
+  function relativeCountdown(date) {
+    var mins = Math.round((date - new Date()) / 60000);
+    if (mins < 60) return 'in ' + Math.max(mins, 1) + ' min';
+    var hours = Math.round(mins / 60);
+    if (hours < 24) return 'in ' + hours + ' hr' + (hours === 1 ? '' : 's');
+    var days = Math.round(hours / 24);
+    return 'in ' + days + ' day' + (days === 1 ? '' : 's');
+  }
+
+  function renderCalendar(items) {
+    if (!items.length) {
+      body.innerHTML = '<p class="agenda-loading">Nothing on your calendar for now.</p>';
+      return;
+    }
+
+    var next = items[0];
+    var nextStart = new Date(next.start);
+    var html = '<div class="cal-next">' +
+      '<span class="cal-next-badge">Next</span>' +
+      '<div class="cal-next-info">' +
+        '<div class="cal-next-title">' + escapeHtml(next.title) + '</div>' +
+        '<div class="cal-next-when">' + dayLabel(nextStart) + ' · ' + timeLabel(next.start, next.end, next.allDay) +
+          (next.allDay ? '' : ' (' + relativeCountdown(nextStart) + ')') + '</div>' +
+      '</div></div><div class="cal-list">';
+
+    var lastLabel = null;
+    items.forEach(function (item) {
+      var start = new Date(item.start);
+      var label = dayLabel(start);
+      if (label !== lastLabel) {
+        html += '<div class="cal-day-label">' + label + '</div>';
+        lastLabel = label;
+      }
+      html += '<div class="cal-event">' +
+        '<span class="cal-event-time">' + (item.allDay ? 'All day' : start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })) + '</span>' +
+        '<span class="cal-event-title">' + escapeHtml(item.title) +
+          (item.location ? '<span class="cal-event-location">' + escapeHtml(item.location) + '</span>' : '') + '</span>' +
+        '</div>';
+    });
+
+    html += '</div>';
+    body.innerHTML = html;
+  }
+
+  function showView(i) {
+    var view = views[i];
+    eyebrow.textContent = view.eyebrow;
+    title.textContent = view.title;
+    view.render();
+    counter.textContent = (i + 1) + ' / ' + views.length;
+    prevBtn.disabled = views.length <= 1;
+    nextBtn.disabled = views.length <= 1;
+  }
+
+  prevBtn.addEventListener('click', function () {
+    if (!views.length) return;
+    index = (index - 1 + views.length) % views.length;
+    showView(index);
+  });
+  nextBtn.addEventListener('click', function () {
+    if (!views.length) return;
+    index = (index + 1) % views.length;
+    showView(index);
+  });
+
+  Promise.all([
+    fetch(WORKER_URL + '/todoist')
+      .then(function (res) { if (!res.ok) throw new Error('todoist error'); return res.json(); })
+      .catch(function () { return null; }),
+    fetch(WORKER_URL + '/calendar')
+      .then(function (res) { if (!res.ok) throw new Error('calendar error'); return res.json(); })
+      .catch(function () { return null; })
+  ]).then(function (results) {
+    var todoist = results[0];
+    var calendar = results[1];
+
+    if (todoist && todoist.status === 'ok') {
+      views.push({ eyebrow: 'Todoist', title: 'Open Tasks', render: function () { renderTodoist(todoist.items); } });
+    }
+    if (calendar && calendar.status === 'ok') {
+      views.push({ eyebrow: 'Fastmail', title: 'Upcoming', render: function () { renderCalendar(calendar.items); } });
+    }
+
+    if (!views.length) {
+      body.innerHTML = '<p class="agenda-error">Tasks and calendar are unavailable right now — check back later.</p>';
+      return;
+    }
+    showView(0);
+  });
+})();

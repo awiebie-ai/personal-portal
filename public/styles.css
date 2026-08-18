@@ -347,40 +347,202 @@ h1.name {
 }
 .github-loading, .github-error { font-size: 12px; color: #656d76; }
 
-/* Card 3 — product screenshot style */
-.card-product {
-  background: linear-gradient(160deg, #2dd4bf 0%, #2563eb 100%);
-  color: #fff;
-  padding: 20px 22px;
-  justify-content: space-between;
+/* Card 3 — Todoist tasks + Fastmail calendar */
+.card-agenda {
+  --agenda-accent: #d1453b;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  padding: 18px 20px;
 }
-.product-app {
-  background: #fff;
-  border-radius: 8px;
-  padding: 10px 12px;
-  width: 190px;
-  box-shadow: 0 4px 14px rgba(0,0,0,0.15);
-}
-.product-app-header {
-  font-size: 10px;
-  color: #999;
+.agenda-header {
   display: flex;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 6px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
-.product-app-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+.agenda-eyebrow { font-size: 11px; color: var(--muted); margin: 0 0 2px; }
+.agenda-title { font-size: 15px; font-weight: 700; margin: 0; }
+.agenda-toggler {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
-.product-app-grid div {
-  height: 10px;
-  border-radius: 2px;
-  background: #eef2ff;
+.agenda-nav-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
 }
-.product-app-grid div.hi { background: #2563eb; }
-.product-title { font-size: 18px; font-weight: 700; line-height: 1.3; margin: 0; }
-.product-eyebrow { font-size: 11px; opacity: 0.85; margin-bottom: 6px; }
+.agenda-nav-btn:hover { border-color: var(--agenda-accent); color: var(--agenda-accent); }
+.agenda-nav-btn:disabled { opacity: 0.35; cursor: default; border-color: #ddd; color: var(--ink); }
+.agenda-counter { font-size: 10.5px; color: var(--muted); min-width: 28px; text-align: center; }
+
+.agenda-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.agenda-loading, .agenda-error { font-size: 12px; color: var(--muted); }
+
+/* -- Todoist panel -- */
+.todoist-stats {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+.todoist-stat {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #faf0ef;
+  color: #b8342b;
+}
+.todoist-stat.is-muted { background: #f4f4f4; color: var(--muted); }
+.todoist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.todoist-task {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.todoist-checkbox {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  flex-shrink: 0;
+}
+.todoist-content {
+  flex: 1;
+  min-width: 0;
+  font-size: 12.5px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.todoist-project {
+  font-size: 10px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.todoist-due {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.todoist-due.is-overdue { color: #d1453b; }
+.todoist-due.is-today { color: #b8342b; }
+.todoist-footer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f0f0f0;
+  text-align: right;
+  flex-shrink: 0;
+}
+.todoist-footer a {
+  font-size: 11px;
+  font-weight: 600;
+  color: #d1453b;
+  text-decoration: none;
+}
+.todoist-footer a:hover { text-decoration: underline; }
+
+/* -- Calendar panel -- */
+.cal-next {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f2f4fa;
+  border: 1px solid #e3e7f3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+}
+.cal-next-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: #3a4d8f;
+  background: #dfe4f7;
+  border-radius: 5px;
+  padding: 3px 6px;
+  flex-shrink: 0;
+}
+.cal-next-info { min-width: 0; }
+.cal-next-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-next-when { font-size: 10.5px; color: var(--muted); }
+.cal-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.cal-day-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #3a4d8f;
+  margin: 8px 0 4px;
+}
+.cal-day-label:first-child { margin-top: 0; }
+.cal-event {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+}
+.cal-event-time {
+  font-size: 10.5px;
+  color: var(--muted);
+  width: 62px;
+  flex-shrink: 0;
+}
+.cal-event-title {
+  font-size: 12px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cal-event-location {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.cal-event-location::before { content: '· '; }
 
 /* Card 4 — split dark style */
 .card-split {
