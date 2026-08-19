@@ -2,10 +2,12 @@ name = "portfolio-headlines"
 main = "src/worker.js"
 compatibility_date = "2024-01-01"
 
-# Runs once a day at 12:00 UTC. Adjust the cron expression to taste
-# (e.g. "0 */6 * * *" for every 6 hours).
+# Fires at both 11:00 and 12:00 UTC — the EDT and EST equivalents of
+# 7:00 AM America/New_York — since cron triggers can't be timezone-aware.
+# The scheduled handler in src/worker.js checks the current Eastern hour
+# and only refreshes on whichever one actually lands at 7 AM that day.
 [triggers]
-crons = ["0 12 * * *"]
+crons = ["0 11 * * *", "0 12 * * *"]
 
 # Created via: wrangler kv namespace create HEADLINES_KV
 [[kv_namespaces]]

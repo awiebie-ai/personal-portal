@@ -9,6 +9,9 @@ const FEEDS = [
 const HEADLINE_COUNT = 9;
 const CANDIDATES_PER_FEED = 5; // pull extras so filtering/dedup can still hit HEADLINE_COUNT
 const KV_KEY = 'headlines';
+const GITHUB_KV_KEY = 'github';
+const TODOIST_KV_KEY = 'todoist';
+const CALENDAR_KV_KEY = 'calendar';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Fixed, ordered list so the portfolio always leads with this project.
@@ -70,37 +73,88 @@ export default {
       if (!env.REFRESH_SECRET || url.searchParams.get('secret') !== env.REFRESH_SECRET) {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
-      await refreshHeadlines(env);
-      const fresh = await env.HEADLINES_KV.get(KV_KEY, 'json');
-      return jsonResponse(fresh, 200);
+      await refreshAll(env);
+      const [headlines, github, todoist, calendar] = await Promise.all([
+        env.HEADLINES_KV.get(KV_KEY, 'json'),
+        env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(CALENDAR_KV_KEY, 'json')
+      ]);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar }, 200);
     }
 
     if (url.pathname === '/github') {
-      const items = await fetchGithubRepos(env);
-      return jsonResponse({ status: 'ok', items }, 200);
+      return jsonResponse(await getCached(env, GITHUB_KV_KEY), 200);
     }
 
     if (url.pathname === '/todoist') {
-      const items = await fetchTodoistTasks(env);
-      return jsonResponse({ status: 'ok', items }, 200);
+      return jsonResponse(await getCached(env, TODOIST_KV_KEY), 200);
     }
 
     if (url.pathname === '/calendar') {
-      const items = await fetchCalendarEvents(env);
-      return jsonResponse({ status: 'ok', items }, 200);
+      return jsonResponse(await getCached(env, CALENDAR_KV_KEY), 200);
     }
 
-    const cached = await env.HEADLINES_KV.get(KV_KEY, 'json');
-    if (!cached) {
-      return jsonResponse({ status: 'pending', items: [] }, 200);
-    }
-    return jsonResponse(cached, 200);
+    return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
+  // Cloudflare cron triggers only run on fixed UTC times, but "7:00 AM
+  // Eastern" shifts by an hour across the DST switch. Rather than juggle
+  // transition dates, both the EDT and EST equivalents (11:00 and 12:00 UTC)
+  // are registered as triggers below, and this handler only actually
+  // refreshes on whichever one currently lands at 7 AM America/New_York.
   async scheduled(event, env, ctx) {
-    ctx.waitUntil(refreshHeadlines(env));
+    const hour = +new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23'
+    }).format(new Date());
+    if (hour !== 7) return;
+    ctx.waitUntil(refreshAll(env));
   }
 };
+
+async function getCached(env, key) {
+  const cached = await env.HEADLINES_KV.get(key, 'json');
+  return cached || { status: 'pending', items: [] };
+}
+
+async function refreshAll(env) {
+  await Promise.allSettled([
+    refreshHeadlines(env),
+    refreshGithub(env),
+    refreshTodoist(env),
+    refreshCalendar(env)
+  ]);
+}
+
+// Each refresh leaves the previous cached value in place on failure, rather
+// than overwriting it with an error, so a transient upstream outage doesn't
+// blank out a card until the next successful run.
+async function refreshGithub(env) {
+  try {
+    const items = await fetchGithubRepos(env);
+    await env.HEADLINES_KV.put(GITHUB_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('github refresh failed', err);
+  }
+}
+
+async function refreshTodoist(env) {
+  try {
+    const items = await fetchTodoistTasks(env);
+    await env.HEADLINES_KV.put(TODOIST_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('todoist refresh failed', err);
+  }
+}
+
+async function refreshCalendar(env) {
+  try {
+    const items = await fetchCalendarEvents(env);
+    await env.HEADLINES_KV.put(CALENDAR_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('calendar refresh failed', err);
+  }
+}
 
 async function refreshHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
