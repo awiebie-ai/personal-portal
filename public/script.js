@@ -1,11 +1,19 @@
 (function () {
-  var heroImg = document.getElementById('heroImage');
+  var heroBg = document.getElementById('heroBg');
   var caption = document.getElementById('heroCaption');
 
-  // Tags chosen to reflect "building websites" as day-to-day work
-  var topics = [
-    'programming', 'coding', 'web-development', 'software-developer',
-    'javascript', 'developer-desk', 'computer-code', 'keyboard'
+  // Generated gradient mesh instead of a fetched photo — no third-party
+  // dependency, so the hero always renders. Colors are drawn from the
+  // site's own accents (brand terracotta, product teal/blue, agenda
+  // red/navy) plus a couple of complementary hues for weekly variety.
+  var palettes = [
+    { name: 'Terracotta Dusk', c1: '#c05621', c2: '#0a1a33', c3: '#e2905a' },
+    { name: 'Tidal Teal', c1: '#2dd4bf', c2: '#2563eb', c3: '#0a1a33' },
+    { name: 'Amber Ember', c1: '#f4a259', c2: '#16181d', c3: '#c05621' },
+    { name: 'Violet Hour', c1: '#7c5cff', c2: '#1c1f26', c3: '#e88fd0' },
+    { name: 'Forest Gold', c1: '#2f855a', c2: '#16181d', c3: '#f4a259' },
+    { name: 'Slate Coral', c1: '#3a4d8f', c2: '#0a1a33', c3: '#f0a08c' },
+    { name: 'Deep Plum', c1: '#6b2d5c', c2: '#0a1a33', c3: '#2dd4bf' }
   ];
 
   function dayOfYear(date) {
@@ -15,17 +23,12 @@
 
   var today = new Date();
   var seed = today.getFullYear() * 1000 + dayOfYear(today); // unique per calendar day
-  var topic = topics[seed % topics.length];
-  var url = 'https://loremflickr.com/1600/900/' + topic + '?lock=' + seed;
+  var palette = palettes[seed % palettes.length];
 
-  heroImg.onload = function () {
-    caption.textContent = 'Image of the day — "' + topic.replace('-', ' ') + '". Refreshes daily.';
-  };
-  heroImg.onerror = function () {
-    // Service unreachable — keep the plain dark background + default caption
-    heroImg.remove();
-  };
-  heroImg.src = url;
+  heroBg.style.setProperty('--hero-c1', palette.c1);
+  heroBg.style.setProperty('--hero-c2', palette.c2);
+  heroBg.style.setProperty('--hero-c3', palette.c3);
+  caption.textContent = "Today's palette — \"" + palette.name + "\". Shifts daily.";
 })();
 
 (function () {
@@ -221,6 +224,7 @@
 })();
 
 (function () {
+  var card = document.querySelector('.card-agenda');
   var body = document.getElementById('agendaBody');
   var eyebrow = document.getElementById('agendaEyebrow');
   var title = document.getElementById('agendaTitle');
@@ -356,6 +360,8 @@
     var view = views[i];
     eyebrow.textContent = view.eyebrow;
     title.textContent = view.title;
+    card.style.setProperty('--agenda-accent', view.accent);
+    card.style.setProperty('--agenda-accent-2', view.accent2);
     view.render();
     counter.textContent = (i + 1) + ' / ' + views.length;
     prevBtn.disabled = views.length <= 1;
@@ -385,10 +391,16 @@
     var calendar = results[1];
 
     if (todoist && todoist.status === 'ok') {
-      views.push({ eyebrow: 'Todoist', title: 'Open Tasks', render: function () { renderTodoist(todoist.items); } });
+      views.push({
+        eyebrow: 'Todoist', title: 'Open Tasks', accent: '#d1453b', accent2: '#f0a08c',
+        render: function () { renderTodoist(todoist.items); }
+      });
     }
     if (calendar && calendar.status === 'ok') {
-      views.push({ eyebrow: 'Fastmail', title: 'Upcoming', render: function () { renderCalendar(calendar.items); } });
+      views.push({
+        eyebrow: 'Fastmail', title: 'Upcoming', accent: '#3a4d8f', accent2: '#93a6e0',
+        render: function () { renderCalendar(calendar.items); }
+      });
     }
 
     if (!views.length) {
