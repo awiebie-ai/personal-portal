@@ -13,7 +13,39 @@ const GITHUB_KV_KEY = 'github';
 const TODOIST_KV_KEY = 'todoist';
 const CALENDAR_KV_KEY = 'calendar';
 const WEATHER_KV_KEY = 'weather';
+const GOV_US_KV_KEY = 'gov-us';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+
+// Left-column "U.S. Government" card: top 3 items from each of the three
+// branches. Sourced straight from official .gov/.gov-adjacent feeds — no
+// Claude summarization here, just cleaned-up excerpts, to keep this card
+// cheap and simple per the original spec.
+const GOV_BRANCH_ITEM_COUNT = 3;
+const GOV_SUMMARY_MAX = 220;
+const WHITEHOUSE_FEED_URL = 'https://www.whitehouse.gov/news/feed/';
+const CONGRESS_RECORD_FEED_URL = 'https://www.govinfo.gov/rss/crec.xml';
+// Term index in this URL is fixed by SCOTUS (25 = October Term 2025); bump
+// to 26 once October Term 2026 opinions start posting.
+const SCOTUS_OPINIONS_URL = 'https://www.supremecourt.gov/opinions/slipopinion/25';
+
+// Left-column "PRC Government" card. Neither Xinhua nor the State Council
+// publish a live RSS feed any more (Xinhua's old feeds are frozen circa
+// 2017-2020), so both are scraped straight from their English-language
+// listing pages, same approach as the SCOTUS table above.
+const GOV_CN_KV_KEY = 'gov-cn';
+const GOV_CN_SOURCE_ITEM_COUNT = 5; // 2 sources x 5 = 10 items total
+const XINHUA_CHINA_URL = 'https://english.news.cn/china/index.htm';
+const STATE_COUNCIL_NEWS_URL = 'https://english.www.gov.cn/news';
+
+// Left-column "Russian Government" card. Unlike Xinhua/State Council, both
+// of these still run real, current RSS/Atom feeds with usable descriptions
+// already inline — no per-article scraping needed. Note: plain http (not
+// https) — the https listeners on these hosts don't reliably terminate TLS
+// for outside traffic.
+const GOV_RU_KV_KEY = 'gov-ru';
+const GOV_RU_SOURCE_ITEM_COUNT = 5; // 2 sources x 5 = 10 items total
+const KREMLIN_FEED_URL = 'http://en.kremlin.ru/events/president/news/feed';
+const GOVERNMENT_RU_FEED_URL = 'http://government.ru/en/news/rss/';
 
 // Fixed two-city list — no geocoding step, so Open-Meteo needs no API key.
 const WEATHER_CITIES = [
@@ -114,14 +146,17 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
         env.HEADLINES_KV.get(CALENDAR_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(WEATHER_KV_KEY, 'json')
+        env.HEADLINES_KV.get(WEATHER_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(GOV_US_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(GOV_CN_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -138,6 +173,18 @@ export default {
 
     if (url.pathname === '/weather') {
       return jsonResponse(await getCached(env, WEATHER_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/gov/us') {
+      return jsonResponse(await getCached(env, GOV_US_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/gov/cn') {
+      return jsonResponse(await getCached(env, GOV_CN_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/gov/ru') {
+      return jsonResponse(await getCached(env, GOV_RU_KV_KEY), 200);
     }
 
     return jsonResponse(await getCached(env, KV_KEY), 200);
@@ -168,7 +215,10 @@ async function refreshAll(env) {
     refreshGithub(env),
     refreshTodoist(env),
     refreshCalendar(env),
-    refreshWeather(env)
+    refreshWeather(env),
+    refreshGovUs(env),
+    refreshGovCn(env),
+    refreshGovRu(env)
   ]);
 }
 
@@ -269,6 +319,267 @@ async function fetchWeatherCities() {
     }
   }
   return results;
+}
+
+async function refreshGovUs(env) {
+  try {
+    const [whiteHouse, congress, scotus] = await Promise.all([
+      fetchWhiteHouseReleases(),
+      fetchCongressRecord(),
+      fetchScotusOpinions()
+    ]);
+    const branches = [
+      { name: 'White House', items: whiteHouse },
+      { name: 'Congress', items: congress },
+      { name: 'Supreme Court', items: scotus }
+    ];
+    await env.HEADLINES_KV.put(GOV_US_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+  } catch (err) {
+    console.error('gov-us refresh failed', err);
+  }
+}
+
+function truncateSummary(text) {
+  const clean = text.replace(/\s*The post.*$/is, '').trim();
+  if (clean.length <= GOV_SUMMARY_MAX) return clean;
+  return clean.slice(0, GOV_SUMMARY_MAX).replace(/\s+\S*$/, '') + '…';
+}
+
+async function fetchWhiteHouseReleases() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const res = await fetch(WHITEHOUSE_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const xml = await res.text();
+  const data = parser.parse(xml);
+  const rawItems = data?.rss?.channel?.item || [];
+  const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+  return items.slice(0, GOV_BRANCH_ITEM_COUNT).map((item) => ({
+    title: stripHtml(String(item.title || '')),
+    summary: truncateSummary(stripHtml(String(item.description || ''))),
+    link: String(item.link || '')
+  }));
+}
+
+// govinfo's "new items" feed isn't ordered by the Record's own date, so it's
+// re-sorted by pubDate here to actually surface the most recent editions.
+async function fetchCongressRecord() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const res = await fetch(CONGRESS_RECORD_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  // <description> in this feed is just a list of PDF/metadata download
+  // links (unused below) but packs enough &nbsp;-style entities across 100
+  // items to blow fast-xml-parser's entity-expansion guard. Strip it
+  // before parsing rather than raising the parser's limit.
+  const xml = (await res.text()).replace(/<description>[\s\S]*?<\/description>/g, '');
+  const data = parser.parse(xml);
+  const rawItems = data?.rss?.channel?.item || [];
+  const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+  const sorted = items
+    .map((item) => ({
+      title: stripHtml(String(item.title || '')),
+      link: String(item.link || ''),
+      pubDate: new Date(item.pubDate || 0)
+    }))
+    .sort((a, b) => b.pubDate - a.pubDate);
+
+  return sorted.slice(0, GOV_BRANCH_ITEM_COUNT).map((item) => {
+    const dateMatch = /\(([^)]+)\)\s*$/.exec(item.title);
+    return {
+      title: 'Congressional Record — ' + (dateMatch ? dateMatch[1] : item.title),
+      summary: 'Official daily record of proceedings and debate in the U.S. House and Senate.',
+      link: item.link
+    };
+  });
+}
+
+// supremecourt.gov has no working RSS feed for opinions, so this scrapes the
+// slip-opinion table directly (server-rendered HTML, newest row first). The
+// row regex mirrors the fixed markup GET /opinions/slipopinion/<term> emits.
+async function fetchScotusOpinions() {
+  const res = await fetch(SCOTUS_OPINIONS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const html = await res.text();
+
+  const rowRe = /<tr>\s*<td[^>]*>\d*<\/td>\s*<td[^>]*>([\d/]+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*><a href='([^']+)'[^>]*title="([^"]*)">([^<]+)<\/a>/g;
+
+  const results = [];
+  let match;
+  while ((match = rowRe.exec(html)) && results.length < GOV_BRANCH_ITEM_COUNT) {
+    const [, date, href, title, caseName] = match;
+    results.push({
+      title: decodeEntities(caseName) + ' (' + date + ')',
+      summary: truncateSummary(decodeEntities(title)),
+      link: href.startsWith('http') ? href : 'https://www.supremecourt.gov' + href
+    });
+  }
+  return results;
+}
+
+async function refreshGovCn(env) {
+  try {
+    const [xinhua, stateCouncil] = await Promise.all([
+      fetchXinhuaArticles(),
+      fetchStateCouncilArticles()
+    ]);
+    const branches = [
+      { name: 'Xinhua', items: xinhua },
+      { name: 'The State Council', items: stateCouncil }
+    ];
+    await env.HEADLINES_KV.put(GOV_CN_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+  } catch (err) {
+    console.error('gov-cn refresh failed', err);
+  }
+}
+
+// Xinhua's China index mixes today's stories in with older "evergreen"
+// features, so items are sorted by the date embedded in their own URL
+// (../YYYYMMDD/.../c.html) rather than trusted on page order.
+async function fetchXinhuaArticles() {
+  const res = await fetch(XINHUA_CHINA_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const html = await res.text();
+  const rowRe = /<a href="(\.\.\/(\d{8})\/[^"]+)"[^>]*>([^<]{8,})<\/a>/g;
+
+  const seen = new Set();
+  const candidates = [];
+  let match;
+  while ((match = rowRe.exec(html))) {
+    const [, href, date, title] = match;
+    if (seen.has(href)) continue;
+    seen.add(href);
+    candidates.push({ date, title: decodeEntities(title.trim()), link: 'https://english.news.cn/' + href.replace(/^\.\.\//, '') });
+  }
+  candidates.sort((a, b) => b.date.localeCompare(a.date));
+
+  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT));
+}
+
+async function fetchStateCouncilArticles() {
+  const res = await fetch(STATE_COUNCIL_NEWS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const html = await res.text();
+  const rowRe = /<a shape="rect" href="(\/\/english\.www\.gov\.cn\/news\/(\d{6})\/(\d{2})\/content_[^"]+)">([^<]{8,})<\/a>/g;
+
+  const seen = new Set();
+  const candidates = [];
+  let match;
+  while ((match = rowRe.exec(html))) {
+    const [, href, yearMonth, day, title] = match;
+    if (seen.has(href)) continue;
+    seen.add(href);
+    candidates.push({ date: yearMonth + day, title: decodeEntities(title.trim()), link: 'https:' + href });
+  }
+  candidates.sort((a, b) => b.date.localeCompare(a.date));
+
+  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT));
+}
+
+async function fillArticleSummaries(items) {
+  const results = [];
+  for (const item of items) {
+    let summary = '';
+    try {
+      summary = truncateSummary(await fetchArticleParagraphs(item.link));
+    } catch (err) {
+      console.error('article fetch failed', item.link, err);
+    }
+    results.push({ title: item.title, summary: summary || item.title, link: item.link });
+  }
+  return results;
+}
+
+// Separate from fetchArticleText below (used by the main headlines card,
+// which feeds Claude and tolerates noisy input) because these sites'
+// templates put boilerplate ("Source: Xinhua", the State Council's "App"
+// download link, an inline date-injection <script>) inside <p> tags
+// themselves, which would otherwise leak into a summary nobody summarizes.
+async function fetchArticleParagraphs(url) {
+  if (!url) return '';
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('text/html')) return '';
+
+  let text = '';
+  let skipParagraph = false;
+  let insideScript = false;
+  await new HTMLRewriter()
+    .on('script', {
+      element(el) {
+        insideScript = true;
+        el.onEndTag(() => { insideScript = false; });
+      }
+    })
+    .on('p', {
+      element(el) {
+        const cls = el.getAttribute('class') || '';
+        skipParagraph = /^(source|editor|time)$/i.test(cls) || /^Top_/i.test(cls);
+      },
+      text(chunk) {
+        if (!skipParagraph && !insideScript) text += chunk.text;
+      }
+    })
+    .transform(res)
+    .arrayBuffer();
+
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+async function refreshGovRu(env) {
+  try {
+    const [kremlin, governmentRu] = await Promise.all([
+      fetchKremlinNews(),
+      fetchGovernmentRuNews()
+    ]);
+    const branches = [
+      { name: 'The Kremlin', items: kremlin },
+      { name: 'Government of Russia', items: governmentRu }
+    ];
+    await env.HEADLINES_KV.put(GOV_RU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+  } catch (err) {
+    console.error('gov-ru refresh failed', err);
+  }
+}
+
+// Atom feed, not RSS — entries live at feed.entry, and each <summary> comes
+// back as an object ({ '#text', '@_type' }) rather than a plain string
+// because it carries a type="html" attribute alongside its text.
+async function fetchKremlinNews() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const res = await fetch(KREMLIN_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  // <content> is the full article HTML (unused below) and packs enough
+  // entities across 20 entries to blow fast-xml-parser's entity-expansion
+  // guard, same issue as the Congressional Record feed above.
+  const xml = (await res.text()).replace(/<content[^>]*>[\s\S]*?<\/content>/g, '');
+  const data = parser.parse(xml);
+  const rawEntries = data?.feed?.entry || [];
+  const entries = Array.isArray(rawEntries) ? rawEntries : [rawEntries];
+
+  return entries.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((entry) => {
+    const linkEl = Array.isArray(entry.link) ? entry.link[0] : entry.link;
+    const link = (linkEl && linkEl['@_href']) || String(entry.id || '');
+    const rawSummary = entry.summary && typeof entry.summary === 'object' ? entry.summary['#text'] : entry.summary;
+    const title = stripHtml(String(entry.title || ''));
+    return {
+      title,
+      summary: truncateSummary(stripHtml(String(rawSummary || ''))) || title,
+      link
+    };
+  });
+}
+
+async function fetchGovernmentRuNews() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const res = await fetch(GOVERNMENT_RU_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const xml = await res.text();
+  const data = parser.parse(xml);
+  const rawItems = data?.rss?.channel?.item || [];
+  const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+  return items.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((item) => {
+    const title = stripHtml(String(item.title || ''));
+    return {
+      title,
+      summary: truncateSummary(stripHtml(String(item.description || ''))) || title,
+      link: String(item.link || '')
+    };
+  });
 }
 
 async function refreshHeadlines(env) {

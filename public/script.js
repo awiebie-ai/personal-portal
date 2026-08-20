@@ -522,3 +522,56 @@
       body.innerHTML = '<p class="weather-error">Weather unavailable right now — check back later.</p>';
     });
 })();
+
+(function () {
+  // Shared by all "government news" side cards (US, PRC, ...): each worker
+  // route returns { status, branches: [{ name, items: [{title,summary,link}] }] }
+  // and renders into a scrollable .gov-body the same way.
+  function renderGovCard(bodyId, route) {
+    var body = document.getElementById(bodyId);
+    var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    fetch(WORKER_URL + route)
+      .then(function (res) {
+        if (!res.ok) throw new Error('worker error');
+        return res.json();
+      })
+      .then(function (data) {
+        if (data.status !== 'ok' || !data.branches || !data.branches.length) {
+          throw new Error('not ready yet');
+        }
+        var html = data.branches.map(function (branch) {
+          var itemsHtml = branch.items.map(function (item) {
+            return '<div class="gov-item">' +
+              '<a class="gov-item-title" href="' + item.link + '" target="_blank" rel="noopener">' + escapeHtml(item.title) + '</a>' +
+              '<p class="gov-item-summary">' + escapeHtml(item.summary) + '</p>' +
+              '</div>';
+          }).join('');
+          return '<div class="gov-section">' +
+            '<p class="gov-section-title">' + escapeHtml(branch.name) + '</p>' +
+            itemsHtml +
+            '</div>';
+        }).join('');
+        body.innerHTML = html;
+      })
+      .catch(function () {
+        body.innerHTML = '<p class="gov-error">Government updates unavailable right now — check back later.</p>';
+      });
+  }
+
+  // White House / Congress / Supreme Court, refreshed on the same daily
+  // 7am ET cycle as the rest of the dashboard.
+  renderGovCard('govUsBody', '/gov/us');
+
+  // Xinhua / The State Council, same daily refresh cycle.
+  renderGovCard('govCnBody', '/gov/cn');
+
+  // The Kremlin / Government of Russia, same daily refresh cycle.
+  renderGovCard('govRuBody', '/gov/ru');
+})();
