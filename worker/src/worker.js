@@ -211,6 +211,13 @@ async function refreshWeather(env) {
   }
 }
 
+// Parsed as UTC so the weekday is derived purely from the "YYYY-MM-DD"
+// components Open-Meteo returns, with no local-timezone shift involved.
+function weekdayShort(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' });
+}
+
 async function fetchWeatherCities() {
   const results = [];
   for (const city of WEATHER_CITIES) {
@@ -219,7 +226,7 @@ async function fetchWeatherCities() {
         latitude: city.lat,
         longitude: city.lon,
         current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
-        daily: 'temperature_2m_max,temperature_2m_min',
+        daily: 'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',
         temperature_unit: 'fahrenheit',
         wind_speed_unit: 'mph',
         timezone: 'auto'
@@ -228,6 +235,21 @@ async function fetchWeatherCities() {
       if (!res.ok) throw new Error('weather fetch failed: ' + res.status);
       const data = await res.json();
       const meta = WEATHER_CODES[data.current.weather_code] || { label: 'Unknown', icon: 'cloud' };
+
+      // Skip index 0 (today, already covered by the current-conditions
+      // block above) and take the next 3 days.
+      const forecast = data.daily.time.slice(1, 4).map((dateStr, i) => {
+        const dayIndex = i + 1;
+        const dayMeta = WEATHER_CODES[data.daily.weather_code[dayIndex]] || { label: 'Unknown', icon: 'cloud' };
+        return {
+          day: weekdayShort(dateStr),
+          icon: dayMeta.icon,
+          condition: dayMeta.label,
+          highF: Math.round(data.daily.temperature_2m_max[dayIndex]),
+          lowF: Math.round(data.daily.temperature_2m_min[dayIndex]),
+          rainChance: Math.round(data.daily.precipitation_probability_max[dayIndex])
+        };
+      });
 
       results.push({
         id: city.id,
@@ -239,7 +261,8 @@ async function fetchWeatherCities() {
         condition: meta.label,
         icon: meta.icon,
         highF: Math.round(data.daily.temperature_2m_max[0]),
-        lowF: Math.round(data.daily.temperature_2m_min[0])
+        lowF: Math.round(data.daily.temperature_2m_min[0]),
+        forecast: forecast
       });
     } catch (err) {
       console.error('weather fetch failed', city.id, err);

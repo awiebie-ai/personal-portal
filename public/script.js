@@ -433,16 +433,33 @@
   var items = [];
   var index = 0;
 
+  function renderForecast(forecast) {
+    if (!forecast || !forecast.length) return '';
+    return '<div class="weather-forecast">' +
+      forecast.map(function (day) {
+        return '<div class="weather-forecast-day">' +
+          '<div class="weather-forecast-label">' + day.day + '</div>' +
+          (ICONS[day.icon] || ICONS.cloud) +
+          '<div class="weather-forecast-rain">' + day.rainChance + '%</div>' +
+          '<div class="weather-forecast-temps"><strong>' + day.highF + '°</strong> ' + day.lowF + '°</div>' +
+        '</div>';
+      }).join('') +
+    '</div>';
+  }
+
   function showView(i) {
     var item = items[i];
     titleEl.textContent = item.name;
 
     body.innerHTML =
-      '<div class="weather-now">' +
-        (ICONS[item.icon] || ICONS.cloud) +
-        '<div><div class="weather-temp">' + item.tempF + '°</div>' +
-        '<div class="weather-condition">' + item.condition + '</div>' +
-        '<div class="weather-feels">Feels like ' + item.feelsLikeF + '°</div></div>' +
+      '<div class="weather-top">' +
+        '<div class="weather-now">' +
+          (ICONS[item.icon] || ICONS.cloud) +
+          '<div><div class="weather-temp">' + item.tempF + '°</div>' +
+          '<div class="weather-condition">' + item.condition + '</div>' +
+          '<div class="weather-feels">Feels like ' + item.feelsLikeF + '°</div></div>' +
+        '</div>' +
+        renderForecast(item.forecast) +
       '</div>' +
       '<div class="weather-stats">' +
         '<span class="weather-stat">High <strong>' + item.highF + '°</strong></span>' +
