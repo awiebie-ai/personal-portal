@@ -32,6 +32,7 @@
 
   var page = document.querySelector('.page');
   var grid = document.querySelector('.grid');
+  var colCenter = document.querySelector('.col-center');
   var viewport = document.querySelector('.coverflow-viewport');
   var track = document.getElementById('coverflowTrack');
   var nav = document.querySelector('.coverflow-nav');
@@ -52,16 +53,39 @@
   // (and their fixed-size text) up to an unreadable, overflowing size.
   function fitViewportHeight() {
     var pagePaddingBottom = parseFloat(getComputedStyle(page).paddingBottom) || 0;
-    var pageGap = parseFloat(getComputedStyle(page).rowGap) || 0;
+    var centerGap = parseFloat(getComputedStyle(colCenter).rowGap) || 0;
     var navMarginTop = parseFloat(getComputedStyle(nav).marginTop) || 0;
 
     var contentBottom = page.getBoundingClientRect().bottom - pagePaddingBottom;
-    var sectionTop = grid.getBoundingClientRect().bottom + pageGap;
+    var sectionTop = grid.getBoundingClientRect().bottom + centerGap;
     var sectionHeight = contentBottom - sectionTop;
     var navHeight = nav.getBoundingClientRect().height;
 
     var viewportHeight = sectionHeight - navMarginTop - navHeight;
     return Math.min(Math.max(Math.round(viewportHeight), 60), MAX_VIEWPORT_HEIGHT);
+  }
+
+  // Side columns (3 left / 5 right) have no content of their own yet, so
+  // there's nothing to size them against except the center column's real
+  // rendered height. Same reasoning as fitViewportHeight above: measure the
+  // actual laid-out box (post coverflow-height fix) and set fixed px
+  // heights on each card, rather than trying to make flexbox stretch them
+  // to match a sibling's auto height (unreliable — see project memory on
+  // nested flex-grow).
+  function fitSideColumns() {
+    var centerRect = colCenter.getBoundingClientRect();
+    var columns = document.querySelectorAll('.col-side');
+    for (var c = 0; c < columns.length; c++) {
+      var col = columns[c];
+      var cards = col.querySelectorAll('.card-side');
+      if (!cards.length) continue;
+      var gap = parseFloat(getComputedStyle(col).rowGap) || 0;
+      var cardHeight = Math.round((centerRect.height - gap * (cards.length - 1)) / cards.length);
+      cardHeight = Math.max(cardHeight, 60);
+      for (var i = 0; i < cards.length; i++) {
+        cards[i].style.height = cardHeight + 'px';
+      }
+    }
   }
 
   function renderCoverflow() {
@@ -129,6 +153,8 @@
 
     prevBtn.disabled = activeIndex === 0;
     nextBtn.disabled = activeIndex === goodNewsItems.length - 1;
+
+    fitSideColumns();
   }
 
   prevBtn.addEventListener('click', function () {

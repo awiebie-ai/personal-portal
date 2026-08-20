@@ -31,15 +31,62 @@ body {
   background: var(--page-bg);
 }
 
+/* Sized for a 1920px-wide browser window (this user's actual screen) — see
+   project memory on layout sizing: fixed px here rather than fluid growth,
+   matching the same approach used for the 1102px height fit below. */
 .page {
-  max-width: 1100px;
+  max-width: 1920px;
   margin: 0 auto;
   min-height: 100vh;
-  padding: 12px 32px;
+  padding: 12px 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
+/* ---- Three-column layout: side cards flank the banner/grid/carousel ---- */
+.layout {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.col-center {
+  flex: 0 0 860px;
+  width: 860px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.col-side {
+  flex: 0 0 494px;
+  width: 494px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card.card-side {
+  /* .card sets a fixed 235px height for the 2x2 grid cards; side cards get
+     their real height from fitSideColumns() in coverflow.js instead, since
+     the right column holds 5 of them and would otherwise blow past the
+     center column's height before JS ever runs. height:auto here keeps the
+     pre-JS flash small (content-sized) rather than 5x235px tall. Two
+     classes (.card.card-side) so this wins regardless of rule order. */
+  height: auto;
+}
+.card-side {
+  background: linear-gradient(90deg, var(--brand), #e2905a) top / 100% 4px no-repeat, var(--news-tint);
+  border: 1px solid var(--news-border);
+  padding: 14px 16px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.card-side-eyebrow { font-size: 11px; color: var(--muted); margin: 0 0 4px; }
+.card-side-title { font-size: 18px; font-weight: 700; margin: 0; }
 
 .bookmarks-nav {
   flex: 0 0 56px;
