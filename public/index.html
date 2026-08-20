@@ -9,8 +9,16 @@
 <body>
   <div class="page">
 
-    <p class="brand">Juniebie</p>
-    <h1 class="name">Manuel Fernandez</h1>
+    <nav class="bookmarks-nav" aria-label="Bookmarks">
+      <a class="bookmark-btn" href="#">Site 1</a>
+      <a class="bookmark-btn" href="#">Site 2</a>
+      <a class="bookmark-btn" href="#">Site 3</a>
+      <a class="bookmark-btn" href="#">Site 4</a>
+      <a class="bookmark-btn" href="#">Site 5</a>
+      <a class="bookmark-btn" href="#">Site 6</a>
+      <a class="bookmark-btn" href="#">Site 7</a>
+      <a class="bookmark-btn" href="#">Site 8</a>
+    </nav>
 
     <div class="hero">
       <div class="hero-bg" id="heroBg"></div>
@@ -78,22 +86,38 @@
         </div>
       </div>
 
-      <div class="card card-split">
-        <div class="split-half light">
-          <div class="split-icon"></div>
-          <p class="split-title">Voice Assistant SDK</p>
-          <p class="split-text">Build for voice with sample tools and shortcuts. Placeholder integration example.</p>
+      <div class="card card-weather">
+        <div class="weather-header">
+          <div>
+            <p class="weather-eyebrow" id="weatherEyebrow">Weather</p>
+            <h3 class="weather-title" id="weatherTitle">Cabo Rojo, PR</h3>
+          </div>
+          <div class="weather-toggler">
+            <button class="weather-nav-btn" id="weatherPrev" type="button" aria-label="Previous location" disabled>‹</button>
+            <span class="weather-counter" id="weatherCounter">–</span>
+            <button class="weather-nav-btn" id="weatherNext" type="button" aria-label="Next location" disabled>›</button>
+          </div>
         </div>
-        <div class="split-half accent">
-          <div class="split-icon"></div>
-          <p class="split-title">Accessibility SDK</p>
-          <p class="split-text">Integrate sample recognition features directly into your app or software.</p>
+        <div class="weather-body" id="weatherBody">
+          <p class="weather-loading">Loading weather…</p>
         </div>
       </div>
 
     </div>
+
+    <section class="coverflow-section" id="good-news">
+      <div class="coverflow-viewport">
+        <div class="coverflow-track" id="coverflowTrack"></div>
+      </div>
+      <div class="coverflow-nav">
+        <button id="cfPrev" type="button" aria-label="Previous">‹</button>
+        <button id="cfNext" type="button" aria-label="Next">›</button>
+      </div>
+    </section>
+
   </div>
 
   <script src="script.js"></script>
+  <script src="coverflow.js"></script>
 </body>
 </html>

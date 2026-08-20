@@ -12,7 +12,47 @@ const KV_KEY = 'headlines';
 const GITHUB_KV_KEY = 'github';
 const TODOIST_KV_KEY = 'todoist';
 const CALENDAR_KV_KEY = 'calendar';
+const WEATHER_KV_KEY = 'weather';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+
+// Fixed two-city list — no geocoding step, so Open-Meteo needs no API key.
+const WEATHER_CITIES = [
+  { id: 'cabo-rojo', name: 'Cabo Rojo, PR', lat: 18.0866, lon: -67.1457 },
+  { id: 'griffin', name: 'Griffin, GA', lat: 33.2468, lon: -84.2641 }
+];
+
+// WMO weather codes (Open-Meteo's `weather_code`) collapsed into the
+// handful of icon buckets the frontend actually draws.
+const WEATHER_CODES = {
+  0: { label: 'Clear sky', icon: 'sun' },
+  1: { label: 'Mostly clear', icon: 'sun-cloud' },
+  2: { label: 'Partly cloudy', icon: 'sun-cloud' },
+  3: { label: 'Overcast', icon: 'cloud' },
+  45: { label: 'Fog', icon: 'fog' },
+  48: { label: 'Freezing fog', icon: 'fog' },
+  51: { label: 'Light drizzle', icon: 'rain' },
+  53: { label: 'Drizzle', icon: 'rain' },
+  55: { label: 'Dense drizzle', icon: 'rain' },
+  56: { label: 'Freezing drizzle', icon: 'rain' },
+  57: { label: 'Freezing drizzle', icon: 'rain' },
+  61: { label: 'Light rain', icon: 'rain' },
+  63: { label: 'Rain', icon: 'rain' },
+  65: { label: 'Heavy rain', icon: 'rain' },
+  66: { label: 'Freezing rain', icon: 'rain' },
+  67: { label: 'Freezing rain', icon: 'rain' },
+  71: { label: 'Light snow', icon: 'snow' },
+  73: { label: 'Snow', icon: 'snow' },
+  75: { label: 'Heavy snow', icon: 'snow' },
+  77: { label: 'Snow grains', icon: 'snow' },
+  80: { label: 'Rain showers', icon: 'rain' },
+  81: { label: 'Rain showers', icon: 'rain' },
+  82: { label: 'Violent rain showers', icon: 'rain' },
+  85: { label: 'Snow showers', icon: 'snow' },
+  86: { label: 'Snow showers', icon: 'snow' },
+  95: { label: 'Thunderstorm', icon: 'storm' },
+  96: { label: 'Thunderstorm with hail', icon: 'storm' },
+  99: { label: 'Thunderstorm with hail', icon: 'storm' }
+};
 
 // Fixed, ordered list so the portfolio always leads with this project.
 // Repos are private, so this must stay server-side behind GITHUB_TOKEN.
@@ -74,13 +114,14 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(CALENDAR_KV_KEY, 'json')
+        env.HEADLINES_KV.get(CALENDAR_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(WEATHER_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -93,6 +134,10 @@ export default {
 
     if (url.pathname === '/calendar') {
       return jsonResponse(await getCached(env, CALENDAR_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/weather') {
+      return jsonResponse(await getCached(env, WEATHER_KV_KEY), 200);
     }
 
     return jsonResponse(await getCached(env, KV_KEY), 200);
@@ -122,7 +167,8 @@ async function refreshAll(env) {
     refreshHeadlines(env),
     refreshGithub(env),
     refreshTodoist(env),
-    refreshCalendar(env)
+    refreshCalendar(env),
+    refreshWeather(env)
   ]);
 }
 
@@ -154,6 +200,52 @@ async function refreshCalendar(env) {
   } catch (err) {
     console.error('calendar refresh failed', err);
   }
+}
+
+async function refreshWeather(env) {
+  try {
+    const items = await fetchWeatherCities();
+    await env.HEADLINES_KV.put(WEATHER_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('weather refresh failed', err);
+  }
+}
+
+async function fetchWeatherCities() {
+  const results = [];
+  for (const city of WEATHER_CITIES) {
+    try {
+      const params = new URLSearchParams({
+        latitude: city.lat,
+        longitude: city.lon,
+        current: 'temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m',
+        daily: 'temperature_2m_max,temperature_2m_min',
+        temperature_unit: 'fahrenheit',
+        wind_speed_unit: 'mph',
+        timezone: 'auto'
+      });
+      const res = await fetch('https://api.open-meteo.com/v1/forecast?' + params.toString());
+      if (!res.ok) throw new Error('weather fetch failed: ' + res.status);
+      const data = await res.json();
+      const meta = WEATHER_CODES[data.current.weather_code] || { label: 'Unknown', icon: 'cloud' };
+
+      results.push({
+        id: city.id,
+        name: city.name,
+        tempF: Math.round(data.current.temperature_2m),
+        feelsLikeF: Math.round(data.current.apparent_temperature),
+        humidity: Math.round(data.current.relative_humidity_2m),
+        windMph: Math.round(data.current.wind_speed_10m),
+        condition: meta.label,
+        icon: meta.icon,
+        highF: Math.round(data.daily.temperature_2m_max[0]),
+        lowF: Math.round(data.daily.temperature_2m_min[0])
+      });
+    } catch (err) {
+      console.error('weather fetch failed', city.id, err);
+    }
+  }
+  return results;
 }
 
 async function refreshHeadlines(env) {

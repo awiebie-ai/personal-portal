@@ -410,3 +410,77 @@
     showView(0);
   });
 })();
+
+(function () {
+  var body = document.getElementById('weatherBody');
+  var titleEl = document.getElementById('weatherTitle');
+  var prevBtn = document.getElementById('weatherPrev');
+  var nextBtn = document.getElementById('weatherNext');
+  var counter = document.getElementById('weatherCounter');
+  // Same Cloudflare Worker, /weather route (Open-Meteo — no API key needed).
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+  var ICONS = {
+    sun: '<svg class="weather-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" stroke-linecap="round"></path></svg>',
+    'sun-cloud': '<svg class="weather-icon" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"></circle><path d="M9 3.5v1.4M9 12.6v1M3.5 9h1.4M12.6 9h1M5.1 5.1l1 1M11.9 11.9l1 1M5.1 12.9l1-1M11.9 6.1l1-1" stroke-linecap="round"></path><path d="M9.5 20.5h8a3.5 3.5 0 0 0 .6-6.95 4.5 4.5 0 0 0-8.6-1.9 3.5 3.5 0 0 0-2 6.6" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+    cloud: '<svg class="weather-icon" viewBox="0 0 24 24"><path d="M6.5 19h11a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.6 9.1 4 4 0 0 0 6.5 19z" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
+    fog: '<svg class="weather-icon" viewBox="0 0 24 24"><path d="M6.5 15.5h11a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.6 5.6 4 4 0 0 0 6.5 15.5z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M4 19h16M6 22h12" stroke-linecap="round"></path></svg>',
+    rain: '<svg class="weather-icon" viewBox="0 0 24 24"><path d="M6.5 13.5h11a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.6 3.6 4 4 0 0 0 6.5 13.5z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 17.5l-1.2 3M12 17.5l-1.2 3M16 17.5l-1.2 3" stroke-linecap="round"></path></svg>',
+    snow: '<svg class="weather-icon" viewBox="0 0 24 24"><path d="M6.5 13.5h11a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.6 3.6 4 4 0 0 0 6.5 13.5z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M8 18v3M8 18l-1.5 1M8 18l1.5 1M12 19v3M12 19l-1.5 1M12 19l1.5 1M16 18v3M16 18l-1.5 1M16 18l1.5 1" stroke-linecap="round"></path></svg>',
+    storm: '<svg class="weather-icon" viewBox="0 0 24 24"><path d="M6.5 12.5h11a4 4 0 0 0 .7-7.94A5.5 5.5 0 0 0 7.6 2.6 4 4 0 0 0 6.5 12.5z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M13 14l-3 5h3l-2 4" stroke-linecap="round" stroke-linejoin="round"></path></svg>'
+  };
+
+  var items = [];
+  var index = 0;
+
+  function showView(i) {
+    var item = items[i];
+    titleEl.textContent = item.name;
+
+    body.innerHTML =
+      '<div class="weather-now">' +
+        (ICONS[item.icon] || ICONS.cloud) +
+        '<div><div class="weather-temp">' + item.tempF + '°</div>' +
+        '<div class="weather-condition">' + item.condition + '</div>' +
+        '<div class="weather-feels">Feels like ' + item.feelsLikeF + '°</div></div>' +
+      '</div>' +
+      '<div class="weather-stats">' +
+        '<span class="weather-stat">High <strong>' + item.highF + '°</strong></span>' +
+        '<span class="weather-stat">Low <strong>' + item.lowF + '°</strong></span>' +
+        '<span class="weather-stat">Humidity <strong>' + item.humidity + '%</strong></span>' +
+        '<span class="weather-stat">Wind <strong>' + item.windMph + ' mph</strong></span>' +
+      '</div>';
+
+    counter.textContent = (i + 1) + ' / ' + items.length;
+    prevBtn.disabled = items.length <= 1;
+    nextBtn.disabled = items.length <= 1;
+  }
+
+  prevBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index - 1 + items.length) % items.length;
+    showView(index);
+  });
+  nextBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index + 1) % items.length;
+    showView(index);
+  });
+
+  fetch(WORKER_URL + '/weather')
+    .then(function (res) {
+      if (!res.ok) throw new Error('worker error');
+      return res.json();
+    })
+    .then(function (data) {
+      if (data.status !== 'ok' || !data.items || !data.items.length) {
+        throw new Error('not ready yet');
+      }
+      items = data.items;
+      index = 0;
+      showView(0);
+    })
+    .catch(function () {
+      body.innerHTML = '<p class="weather-error">Weather unavailable right now — check back later.</p>';
+    });
+})();
