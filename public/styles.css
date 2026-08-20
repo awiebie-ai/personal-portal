@@ -156,24 +156,20 @@ body {
 }
 
 .hero-logo {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  letter-spacing: 3px;
+  letter-spacing: 2px;
   text-transform: uppercase;
 }
 
-.hero-menu {
-  width: 22px;
-  height: 16px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.hero-menu span {
-  display: block;
-  height: 2px;
-  background: #fff;
-  border-radius: 1px;
+.hero-time {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.8);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding-top: 3px;
 }
 
 .hero-caption {

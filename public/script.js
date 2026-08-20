@@ -1,6 +1,8 @@
 (function () {
   var heroBg = document.getElementById('heroBg');
   var caption = document.getElementById('heroCaption');
+  var heroDate = document.getElementById('heroDate');
+  var heroTime = document.getElementById('heroTime');
 
   // Generated gradient mesh instead of a fetched photo — no third-party
   // dependency, so the hero always renders. Colors are drawn from the
@@ -21,14 +23,33 @@
     return Math.floor((date - start) / 86400000);
   }
 
-  var today = new Date();
-  var seed = today.getFullYear() * 1000 + dayOfYear(today); // unique per calendar day
-  var palette = palettes[seed % palettes.length];
+  var appliedDayKey = null;
 
-  heroBg.style.setProperty('--hero-c1', palette.c1);
-  heroBg.style.setProperty('--hero-c2', palette.c2);
-  heroBg.style.setProperty('--hero-c3', palette.c3);
-  caption.textContent = "Today's palette — \"" + palette.name + "\". Shifts daily.";
+  function applyPaletteForToday(now) {
+    var dayKey = now.getFullYear() * 1000 + dayOfYear(now);
+    if (dayKey === appliedDayKey) return; // already showing the right day's palette
+    appliedDayKey = dayKey;
+
+    var palette = palettes[dayKey % palettes.length];
+    heroBg.style.setProperty('--hero-c1', palette.c1);
+    heroBg.style.setProperty('--hero-c2', palette.c2);
+    heroBg.style.setProperty('--hero-c3', palette.c3);
+    caption.textContent = "Today's palette — \"" + palette.name + "\". Shifts daily.";
+  }
+
+  // This page tends to stay open as a homepage/dashboard rather than being
+  // reloaded each day, so the palette and header are recomputed on an
+  // interval (not just once at load) — otherwise a tab left open overnight
+  // would keep showing yesterday's palette and date indefinitely.
+  function tick() {
+    var now = new Date();
+    applyPaletteForToday(now);
+    heroDate.textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    heroTime.textContent = now.toLocaleTimeString('en-GB', { timeZone: 'UTC', hour: '2-digit', minute: '2-digit', hour12: false }) + ' GMT';
+  }
+
+  tick();
+  setInterval(tick, 15000);
 })();
 
 (function () {

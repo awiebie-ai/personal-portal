@@ -1,32 +1,32 @@
 (function () {
   var goodNewsItems = [
     {
-      title: 'Community Garden Feeds 200 Families',
-      snippet: 'A once-vacant lot on the east side has been transformed into a thriving community garden that now supplies fresh produce to roughly two hundred families each week. Volunteers rotate shifts to tend rows of tomatoes, squash, and leafy greens, while a local culinary school donates surplus seedlings every spring. Organizers say the harvest table, open every Saturday morning, has become a gathering spot as much as a food source, with neighbors trading recipes and tips long after the baskets are empty.'
+      title: 'White Storks Return to English Midlands After 600 Years',
+      snippet: 'A breeding population of white storks has re-established itself in the English Midlands for the first time since the birds vanished from the region roughly six centuries ago. The comeback is the result of a years-long reintroduction effort that released captive-bred storks onto restored wetland and parkland habitat, then waited for wild pairs to nest and fledge chicks on their own. Conservationists say the milestone shows how quickly a lost species can return once the right habitat is back in place. (Good News Network)'
     },
     {
-      title: 'Teen Invents Low-Cost Water Filter',
-      snippet: 'A sixteen-year-old student built a low-cost water filter using layered sand, charcoal, and repurposed plastic bottles after seeing reports of contaminated wells near rural schools. Early tests show the design removes the vast majority of common bacteria at a fraction of commercial filter prices. The teen has since partnered with a local nonprofit to distribute kits to a dozen schools, and engineering mentors are helping refine the build so students can assemble it with hardware-store materials.'
+      title: 'DoorDash Driver Showered With Wedding Gifts After Viral Note',
+      snippet: 'A delivery driver who tucked a short note about his upcoming wedding into a food bag had no idea it would reach thousands of strangers. After the customer shared it online, the post spread quickly, and people began sending the couple gifts, cards, and contributions toward their big day. The driver said he was stunned that a small, personal aside meant only for one customer ended up turning into support from an entire online community. (Good News Network)'
     },
     {
-      title: 'Shelter Finds Homes for Every Dog',
-      snippet: 'For the first time in its fifteen-year history, the county animal shelter reported an empty kennel this week after every dog in its care was adopted during a month-long fee-waived event. Staff credit a mix of expanded weekend hours, partnerships with local pet stores for meet-and-greets, and a social media push that turned several long-term residents into local minor celebrities. The shelter says it is already preparing foster placements to keep pace if intake rises again in the coming weeks.'
+      title: 'A Neighbor’s Loud Music Led to an Unlikely Family',
+      snippet: 'When a woman went upstairs to ask a neighbor to turn the music down, she found an 86-year-old widow living alone with no family nearby. What began as a courtesy visit turned into regular check-ins, then shared meals, then something closer to kinship. The two now describe each other as family, with the younger woman taking on the role of the granddaughter the older woman never had — proof that a minor annoyance can be the start of real connection. (Sunny Skyz)'
     },
     {
-      title: 'Solar Co-op Cuts Bills by 40%',
-      snippet: 'A resident-run solar cooperative that pooled panels across forty rooftops has cut member electric bills by roughly forty percent since going live last spring. The group negotiated bulk pricing on equipment and installation, then split the output using a shared metering agreement worked out with the utility. Founders say the model is easy to replicate and are now helping two neighboring communities set up their own co-ops, with a goal of reaching a thousand connected rooftops within three years.'
+      title: 'Idaho Teens Turn Viral Fame Into a River Cleanup Mission',
+      snippet: 'A group of Idaho teenagers who built a following online chronicling their summer decided to put that attention to use, organizing volunteers to pull trash out of the Boise River. What started as a single cleanup day has grown into an ongoing effort, with the teens using their platform to recruit more hands and keep momentum going through the season. Local residents say the river is visibly cleaner, and the group hopes the project outlasts the summer that inspired it. (Sunny Skyz)'
     },
     {
-      title: 'Free Tutoring Program Hits 500 Students',
-      snippet: 'A retired schoolteacher who started tutoring a handful of neighborhood kids at her kitchen table five years ago now runs a free after-school program serving more than five hundred students across three locations. Volunteer tutors, many of them former students themselves, cover everything from basic reading to algebra, and the program recently added a small lending library stocked entirely through community donations. Organizers say the biggest challenge now is simply finding enough space.'
+      title: 'A Traveling Library Brings Books to Children in Rural Syria',
+      snippet: 'A colorfully painted bus loaded with books, puppets, and art supplies now travels between towns in war-affected parts of Syria, giving children access to stories and creative activities many haven’t had in years. Volunteers running the mobile library say the sessions offer more than literacy — they give kids a stretch of normal childhood amid ongoing hardship. The project has expanded its route as demand has grown, reaching villages that have gone without a library of any kind for a decade. (Positive News)'
     },
     {
-      title: 'New Hospital Wing Opens After Fundraiser',
-      snippet: 'A community fundraiser that ran for just under two years has paid for a new hospital wing, adding twenty beds and a dedicated pediatric unit to a facility that had been operating well beyond capacity. Local businesses matched individual donations dollar for dollar during the campaign’s final months, helping the effort clear its goal three months ahead of schedule. Administrators say the new wing will cut emergency room wait times and let more patients stay close to home for treatment.'
+      title: 'The ‘Sisterhood’ Restoring Indonesia’s Coral Reefs',
+      snippet: 'On the small island of Gili Air, a group of local women has trained as marine conservationists, transplanting coral fragments onto reef frames to help damaged sections of the ecosystem recover. The program gives the women new skills and income while directly repairing reefs that support the island’s fishing and tourism economy. Organizers say the restored patches are already drawing back fish species that had disappeared from the area, and the program is training a new cohort each season. (Reasons to Be Cheerful)'
     },
     {
-      title: 'Volunteers Restore Historic Park Pond',
-      snippet: 'A crumbling pond in one of the city’s oldest parks has been fully restored after a two-year volunteer effort that removed decades of sediment and reintroduced native plants along its banks. The project also brought back a resident population of turtles and herons that had disappeared as the water quality declined. Neighbors who organized weekend cleanup crews say the pond is now a favorite stop on morning walks, and the parks department has committed to regular maintenance to keep it that way.'
+      title: 'Mother-Son Duo’s ‘Terrible’ Cartoon Becomes a Box-Office Hit',
+      snippet: 'An animated film about a cow, made by a Chinese mother-and-son team with none of the polish of a major studio production, became a surprise commercial success after word of mouth turned it into a theater draw. Audiences embraced its rough-around-the-edges charm rather than being put off by it, and the pair’s low-budget passion project ended up outperforming far more expensive releases. The story has become a feel-good case study in what resonates with audiences when sincerity beats polish. (Upworthy)'
     }
   ];
 
