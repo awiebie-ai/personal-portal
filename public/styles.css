@@ -132,6 +132,24 @@ body {
   text-align: left;
   padding: 14px 16px;
 }
+/* Each gov card's top strip is that country's flag colors as hard-edged
+   stripes (not a blended gradient) instead of the generic brand accent,
+   so the strip reads as a flag swatch at a glance. */
+.card-gov-us {
+  background:
+    linear-gradient(90deg, #b22234 0%, #b22234 33%, #ffffff 33%, #ffffff 66%, #3c3b6e 66%, #3c3b6e 100%) top / 100% 4px no-repeat,
+    var(--news-tint);
+}
+.card-gov-cn {
+  background:
+    linear-gradient(90deg, #de2910 0%, #de2910 78%, #ffde00 78%, #ffde00 100%) top / 100% 4px no-repeat,
+    var(--news-tint);
+}
+.card-gov-ru {
+  background:
+    linear-gradient(90deg, #ffffff 0%, #ffffff 33%, #0039a6 33%, #0039a6 66%, #d52b1e 66%, #d52b1e 100%) top / 100% 4px no-repeat,
+    var(--news-tint);
+}
 .gov-header {
   display: flex;
   align-items: center;
