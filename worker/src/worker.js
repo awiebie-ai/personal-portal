@@ -16,6 +16,7 @@ const WEATHER_KV_KEY = 'weather';
 const GOV_US_KV_KEY = 'gov-us';
 const JEWISH_KV_KEY = 'jewish';
 const CATHOLIC_KV_KEY = 'catholic';
+const ISLAMIC_KV_KEY = 'islamic';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
@@ -52,6 +53,28 @@ const CATHOLIC_FEEDS = [
 ];
 const USCCB_FEED_URL = 'https://www.usccb.org/news.rss';
 const USCCB_ITEM_COUNT = 1;
+
+// Right-column "Islam" card, same pattern as the two religion cards above.
+// Al Arabiya English's feed consistently returns a 403 "access denied" page
+// (a WAF block, not a bad URL) from this dev environment, tolerated the
+// same way as OSV News/ToI/Chabad. Religion News Service's feed covers all
+// religions, so its candidates are filtered down to ones actually tagged or
+// titled Islam/Muslim before being pooled. Middle East Eye ships its
+// <description> as escaped HTML with the headline repeated in a leading
+// <h2> and packs enough entities across 20 items to trip fast-xml-parser's
+// entity-expansion guard (same issue as USCCB above), so it's fetched with
+// its own regex extractor instead of the shared XMLParser.
+const ISLAMIC_HEADLINE_COUNT = 7;
+const ISLAMIC_SUMMARY_MAX = 170;
+const ISLAM_KEYWORDS = /islam|muslim/i;
+const ISLAMIC_FEEDS = [
+  { name: 'Al Jazeera English', url: 'https://www.aljazeera.com/xml/rss/all.xml', count: 3 },
+  { name: 'Religion News Service', url: 'https://religionnews.com/feed/', count: 3, filterIslam: true },
+  { name: 'Al Arabiya English', url: 'https://english.alarabiya.net/tools/rss', count: 2 },
+  { name: 'MuslimMatters.org', url: 'https://muslimmatters.org/feed/', count: 1 }
+];
+const MEE_FEED_URL = 'https://www.middleeasteye.net/rss';
+const MEE_ITEM_COUNT = 3;
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
 // branches. Sourced straight from official .gov/.gov-adjacent feeds — no
@@ -183,7 +206,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -193,9 +216,10 @@ export default {
         env.HEADLINES_KV.get(GOV_CN_KV_KEY, 'json'),
         env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json'),
         env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json')
+        env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -234,6 +258,10 @@ export default {
       return jsonResponse(await getCached(env, CATHOLIC_KV_KEY), 200);
     }
 
+    if (url.pathname === '/religion/islamic') {
+      return jsonResponse(await getCached(env, ISLAMIC_KV_KEY), 200);
+    }
+
     return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
@@ -268,7 +296,8 @@ async function refreshAll(env) {
     refreshGovCn(env),
     refreshGovRu(env),
     refreshJewish(env),
-    refreshCatholic(env)
+    refreshCatholic(env),
+    refreshIslamic(env)
   ]);
 }
 
@@ -758,6 +787,85 @@ async function fetchUsccbNews(count) {
       title,
       link: linkRaw.trim(),
       summary: truncateSummary(stripHtml(decodeEntities(descRaw)), CATHOLIC_SUMMARY_MAX) || title
+    };
+  });
+}
+
+async function refreshIslamic(env) {
+  try {
+    const items = await fetchIslamicHeadlines();
+    await env.HEADLINES_KV.put(ISLAMIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('islamic refresh failed', err);
+  }
+}
+
+function itemIsIslamRelevant(item) {
+  const rawCategory = item.category;
+  const cats = Array.isArray(rawCategory) ? rawCategory : (rawCategory ? [rawCategory] : []);
+  if (cats.some((c) => ISLAM_KEYWORDS.test(String(c)))) return true;
+  return ISLAM_KEYWORDS.test(String(item.title || ''));
+}
+
+async function fetchIslamicHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of ISLAMIC_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      let items = Array.isArray(rawItems) ? rawItems : [rawItems];
+      if (feed.filterIslam) items = items.filter(itemIsIslamRelevant);
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: truncateSummary(stripHtml(String(item.description || '')), ISLAMIC_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('islamic feed fetch failed', feed.url, err);
+    }
+  }
+
+  try {
+    candidates.push(...(await fetchMiddleEastEyeNews(MEE_ITEM_COUNT)));
+  } catch (err) {
+    console.error('islamic feed fetch failed', MEE_FEED_URL, err);
+  }
+
+  return dedupeByTitle(candidates).slice(0, ISLAMIC_HEADLINE_COUNT);
+}
+
+// Regex-extracted like fetchUsccbNews above: Middle East Eye's <description>
+// is escaped HTML (needs decoding before tag-stripping), with the headline
+// repeated inside a leading <h2> block that's dropped here so it doesn't
+// duplicate the card's own headline, and packs enough entities across 20
+// items to trip fast-xml-parser's entity-expansion guard.
+async function fetchMiddleEastEyeNews(count) {
+  const res = await fetch(MEE_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+  const xml = await res.text();
+  const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+
+  return itemBlocks.slice(0, count).map((block) => {
+    const titleRaw = (/<title>([\s\S]*?)<\/title>/.exec(block) || [, ''])[1];
+    const linkRaw = (/<link>([\s\S]*?)<\/link>/.exec(block) || [, ''])[1];
+    const descRaw = (/<description>([\s\S]*?)<\/description>/.exec(block) || [, ''])[1];
+    const decoded = decodeEntities(descRaw).replace(/<h2>[\s\S]*?<\/h2>/i, '');
+    const title = stripHtml(decodeEntities(titleRaw));
+    return {
+      source: 'Middle East Eye',
+      title,
+      link: linkRaw.trim(),
+      summary: truncateSummary(stripHtml(decoded), ISLAMIC_SUMMARY_MAX) || title
     };
   });
 }

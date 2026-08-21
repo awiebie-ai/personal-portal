@@ -772,3 +772,90 @@
       list.innerHTML = '<p class="catholic-error">Catholic world headlines unavailable right now — check back later.</p>';
     });
 })();
+
+(function () {
+  // Right-column "Islam" card. Same Cloudflare Worker, /religion/islamic
+  // route (Al Jazeera English, Religion News Service, Al Arabiya English,
+  // MuslimMatters.org, Middle East Eye pooled together). Mirrors the
+  // Judaism/Catholicism card IIFEs above.
+  var list = document.getElementById('islamicList');
+  var prevBtn = document.getElementById('islamicPrev');
+  var nextBtn = document.getElementById('islamicNext');
+  var counter = document.getElementById('islamicCounter');
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+  var items = [];
+  var index = 0;
+
+  function fitText(el, fullText, container) {
+    el.textContent = fullText;
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    var words = fullText.split(' ');
+    while (words.length > 4 && container.scrollHeight > container.clientHeight) {
+      words.pop();
+      el.textContent = words.join(' ') + '…';
+    }
+  }
+
+  function renderCurrent() {
+    var item = items[index];
+    list.innerHTML = '';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'islamic-item';
+
+    var source = document.createElement('p');
+    source.className = 'islamic-source';
+    source.textContent = item.source;
+
+    var headline = document.createElement('a');
+    headline.className = 'islamic-headline';
+    headline.href = item.link;
+    headline.target = '_blank';
+    headline.rel = 'noopener';
+    headline.textContent = item.title;
+
+    var summary = document.createElement('p');
+    summary.className = 'islamic-summary';
+
+    wrap.appendChild(source);
+    wrap.appendChild(headline);
+    wrap.appendChild(summary);
+    list.appendChild(wrap);
+
+    fitText(summary, item.summary, list);
+
+    counter.textContent = (index + 1) + ' / ' + items.length;
+    prevBtn.disabled = items.length <= 1;
+    nextBtn.disabled = items.length <= 1;
+  }
+
+  prevBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index - 1 + items.length) % items.length;
+    renderCurrent();
+  });
+  nextBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index + 1) % items.length;
+    renderCurrent();
+  });
+
+  fetch(WORKER_URL + '/religion/islamic')
+    .then(function (res) {
+      if (!res.ok) throw new Error('worker error');
+      return res.json();
+    })
+    .then(function (data) {
+      if (data.status !== 'ok' || !data.items || !data.items.length) {
+        throw new Error('not ready yet');
+      }
+      items = data.items;
+      index = 0;
+      renderCurrent();
+    })
+    .catch(function () {
+      list.innerHTML = '<p class="islamic-error">Islamic world headlines unavailable right now — check back later.</p>';
+    });
+})();
