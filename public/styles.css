@@ -48,6 +48,13 @@
   --hindu-border: #f4d9b8;
   --hindu-accent: #cc5200;
   --hindu-accent-2: #ff9d4d;
+
+  /* Maroon and gold — the colors of Tibetan/Himalayan monastic robes and
+     Dharma wheel iconography, traditionally associated with Buddhism. */
+  --buddhist-tint: #fbf3ef;
+  --buddhist-border: #e8d2c0;
+  --buddhist-accent: #7a1f2b;
+  --buddhist-accent-2: #d4a017;
 }
 
 * { box-sizing: border-box; }
@@ -490,6 +497,81 @@ body {
 .hindu-headline:hover { color: var(--hindu-accent); }
 .hindu-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
 .hindu-loading, .hindu-error { font-size: 12px; color: var(--muted); }
+
+/* Right-column "Buddhism" side card — Lion's Roar / Tricycle / Religion
+   Unplugged / Buddhistdoor Global headlines, same toggler UX as the other
+   religion cards, in Buddhism's traditional maroon/gold. */
+.card-buddhist {
+  background: linear-gradient(90deg, var(--buddhist-accent), var(--buddhist-accent-2)) top / 100% 4px no-repeat, var(--buddhist-tint);
+  border: 1px solid var(--buddhist-border);
+}
+.card.card-buddhist {
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  padding: 14px 16px;
+}
+.buddhist-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+.buddhist-emoji { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.buddhist-heading { font-size: 15px; font-weight: 700; margin: 0; flex: 1; }
+.buddhist-toggler {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.buddhist-nav-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.buddhist-nav-btn:hover { border-color: var(--buddhist-accent); color: var(--buddhist-accent); }
+.buddhist-nav-btn:disabled { opacity: 0.35; cursor: default; border-color: #ddd; color: var(--ink); }
+.buddhist-counter { font-size: 10.5px; color: var(--muted); min-width: 28px; text-align: center; }
+.buddhist-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.buddhist-item { flex-shrink: 0; }
+.buddhist-source {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--buddhist-accent);
+  margin: 0 0 4px;
+}
+.buddhist-headline {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  margin: 0 0 6px;
+}
+.buddhist-headline:hover { color: var(--buddhist-accent); }
+.buddhist-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+.buddhist-loading, .buddhist-error { font-size: 12px; color: var(--muted); }
 
 .bookmarks-nav {
   flex: 0 0 56px;

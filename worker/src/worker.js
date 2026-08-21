@@ -18,6 +18,7 @@ const JEWISH_KV_KEY = 'jewish';
 const CATHOLIC_KV_KEY = 'catholic';
 const ISLAMIC_KV_KEY = 'islamic';
 const HINDU_KV_KEY = 'hindu';
+const BUDDHIST_KV_KEY = 'buddhist';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
@@ -78,10 +79,7 @@ const MEE_FEED_URL = 'https://www.middleeasteye.net/rss';
 const MEE_ITEM_COUNT = 3;
 
 // Right-column "Hinduism" card, same pattern as the three religion cards
-// above. Patheos' Hindu channel blogger is largely dormant (its feed's most
-// recent post is from 2021) but stays in the pool per the user's source
-// list, at a low count so a stale item rarely crowds out fresher ones.
-// Hindu American Foundation's <description> is just WordPress's
+// above. Hindu American Foundation's <description> is just WordPress's
 // "The post ... appeared first on ..." boilerplate with no real excerpt, so
 // it falls back to the title (same `|| title` fallback every card here
 // already uses). ISKCON News's feed is unusually large (~2.5MB, 1000 items)
@@ -90,18 +88,40 @@ const MEE_ITEM_COUNT = 3;
 // parse the whole thing through the shared XMLParser. Hindu-blog.com is a
 // Blogger/Atom feed (feed/entry, not rss/channel/item), reached via its
 // Feedburner URL since Workers' fetch would otherwise need to follow a
-// redirect to get there.
+// redirect to get there. (Patheos' Hindu channel was dropped — its feed's
+// most recent post was from 2021, too dormant to be useful here.)
 const HINDU_HEADLINE_COUNT = 7;
 const HINDU_SUMMARY_MAX = 170;
 const HINDU_FEEDS = [
   { name: 'Hindu Press International', url: 'https://www.hinduismtoday.com/hpi/feed/', count: 3 },
-  { name: 'Hindu American Foundation', url: 'https://www.hinduamerican.org/feed/', count: 2 },
-  { name: 'Patheos — Hindu Channel', url: 'https://www.patheos.com/blogs/hindu2/feed/', count: 1 }
+  { name: 'Hindu American Foundation', url: 'https://www.hinduamerican.org/feed/', count: 2 }
 ];
 const ISKCON_FEED_URL = 'https://iskconnews.org/feed/';
-const ISKCON_ITEM_COUNT = 2;
+const ISKCON_ITEM_COUNT = 3;
 const HINDU_BLOG_FEED_URL = 'http://feeds.feedburner.com/hindublog';
 const HINDU_BLOG_ITEM_COUNT = 2;
+
+// Right-column "Buddhism" card, same pattern as the four religion cards
+// above. The Buddhist Channel and Patheos' Buddhist channel were both
+// dropped: buddhistchannel.tv has no working recency-ordered feed (its only
+// discoverable RSS URL is an 11MB dump of its entire undated article
+// archive under a generic phpwcms placeholder title, not a real headline
+// feed), and Patheos' Buddhist blog is marked dormant in its own page
+// markup — same issue that got Patheos dropped from the Hindu card.
+// Religion Unplugged covers all religions, so its candidates are filtered
+// down to ones tagged or titled Buddhism/Buddhist first. Buddhistdoor
+// Global's feed is valid but currently returns zero items — kept in the
+// pool anyway since a feed with nothing to give just contributes nothing,
+// costing this card little if it stays empty and nothing if it recovers.
+const BUDDHIST_HEADLINE_COUNT = 7;
+const BUDDHIST_SUMMARY_MAX = 170;
+const BUDDHISM_KEYWORDS = /buddh/i;
+const BUDDHIST_FEEDS = [
+  { name: 'Lion’s Roar', url: 'https://www.lionsroar.com/feed/', count: 3 },
+  { name: 'Tricycle', url: 'https://tricycle.org/feed/', count: 3 },
+  { name: 'Religion Unplugged', url: 'https://religionunplugged.com/news?format=rss', count: 2, filterBuddhism: true },
+  { name: 'Buddhistdoor Global', url: 'https://www.buddhistdoor.net/feed/', count: 2 }
+];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
 // branches. Sourced straight from official .gov/.gov-adjacent feeds — no
@@ -233,7 +253,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -245,9 +265,10 @@ export default {
         env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json'),
         env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json'),
         env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(HINDU_KV_KEY, 'json')
+        env.HEADLINES_KV.get(HINDU_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(BUDDHIST_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -294,6 +315,10 @@ export default {
       return jsonResponse(await getCached(env, HINDU_KV_KEY), 200);
     }
 
+    if (url.pathname === '/religion/buddhist') {
+      return jsonResponse(await getCached(env, BUDDHIST_KV_KEY), 200);
+    }
+
     return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
@@ -330,7 +355,8 @@ async function refreshAll(env) {
     refreshJewish(env),
     refreshCatholic(env),
     refreshIslamic(env),
-    refreshHindu(env)
+    refreshHindu(env),
+    refreshBuddhist(env)
   ]);
 }
 
@@ -1013,6 +1039,53 @@ async function fetchHinduBlogPosts(count) {
       summary: truncateSummary(stripHtml(atomFieldText(entry.summary)), HINDU_SUMMARY_MAX) || title
     };
   });
+}
+
+async function refreshBuddhist(env) {
+  try {
+    const items = await fetchBuddhistHeadlines();
+    await env.HEADLINES_KV.put(BUDDHIST_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('buddhist refresh failed', err);
+  }
+}
+
+function itemIsBuddhismRelevant(item) {
+  const rawCategory = item.category;
+  const cats = Array.isArray(rawCategory) ? rawCategory : (rawCategory ? [rawCategory] : []);
+  if (cats.some((c) => BUDDHISM_KEYWORDS.test(String(c)))) return true;
+  return BUDDHISM_KEYWORDS.test(String(item.title || ''));
+}
+
+async function fetchBuddhistHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of BUDDHIST_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      let items = Array.isArray(rawItems) ? rawItems : [rawItems];
+      if (feed.filterBuddhism) items = items.filter(itemIsBuddhismRelevant);
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: truncateSummary(stripHtml(String(item.description || '')), BUDDHIST_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('buddhist feed fetch failed', feed.url, err);
+    }
+  }
+
+  return dedupeByTitle(candidates).slice(0, BUDDHIST_HEADLINE_COUNT);
 }
 
 async function refreshHeadlines(env) {
