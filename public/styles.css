@@ -41,6 +41,13 @@
   --islamic-border: #d3ecdc;
   --islamic-accent: #16794a;
   --islamic-accent-2: #6bc79a;
+
+  /* Saffron/kesari — the color most traditionally associated with
+     Hinduism, worn by sadhus and central to Dharmic iconography. */
+  --hindu-tint: #fff7f0;
+  --hindu-border: #f4d9b8;
+  --hindu-accent: #cc5200;
+  --hindu-accent-2: #ff9d4d;
 }
 
 * { box-sizing: border-box; }
@@ -407,6 +414,82 @@ body {
 .islamic-headline:hover { color: var(--islamic-accent); }
 .islamic-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
 .islamic-loading, .islamic-error { font-size: 12px; color: var(--muted); }
+
+/* Right-column "Hinduism" side card — Hindu Press International / ISKCON
+   News / Hindu American Foundation / Hindu Blog / Patheos Hindu Channel
+   headlines, same toggler UX as the other religion cards, in Hinduism's
+   traditional saffron/white. */
+.card-hindu {
+  background: linear-gradient(90deg, var(--hindu-accent), var(--hindu-accent-2)) top / 100% 4px no-repeat, var(--hindu-tint);
+  border: 1px solid var(--hindu-border);
+}
+.card.card-hindu {
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  padding: 14px 16px;
+}
+.hindu-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+.hindu-emoji { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.hindu-heading { font-size: 15px; font-weight: 700; margin: 0; flex: 1; }
+.hindu-toggler {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hindu-nav-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.hindu-nav-btn:hover { border-color: var(--hindu-accent); color: var(--hindu-accent); }
+.hindu-nav-btn:disabled { opacity: 0.35; cursor: default; border-color: #ddd; color: var(--ink); }
+.hindu-counter { font-size: 10.5px; color: var(--muted); min-width: 28px; text-align: center; }
+.hindu-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.hindu-item { flex-shrink: 0; }
+.hindu-source {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--hindu-accent);
+  margin: 0 0 4px;
+}
+.hindu-headline {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  margin: 0 0 6px;
+}
+.hindu-headline:hover { color: var(--hindu-accent); }
+.hindu-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+.hindu-loading, .hindu-error { font-size: 12px; color: var(--muted); }
 
 .bookmarks-nav {
   flex: 0 0 56px;

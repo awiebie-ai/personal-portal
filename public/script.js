@@ -859,3 +859,90 @@
       list.innerHTML = '<p class="islamic-error">Islamic world headlines unavailable right now — check back later.</p>';
     });
 })();
+
+(function () {
+  // Right-column "Hinduism" card. Same Cloudflare Worker, /religion/hindu
+  // route (Hindu Press International, ISKCON News, Hindu American
+  // Foundation, Hindu Blog, Patheos Hindu Channel pooled together). Mirrors
+  // the other religion card IIFEs above.
+  var list = document.getElementById('hinduList');
+  var prevBtn = document.getElementById('hinduPrev');
+  var nextBtn = document.getElementById('hinduNext');
+  var counter = document.getElementById('hinduCounter');
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+  var items = [];
+  var index = 0;
+
+  function fitText(el, fullText, container) {
+    el.textContent = fullText;
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    var words = fullText.split(' ');
+    while (words.length > 4 && container.scrollHeight > container.clientHeight) {
+      words.pop();
+      el.textContent = words.join(' ') + '…';
+    }
+  }
+
+  function renderCurrent() {
+    var item = items[index];
+    list.innerHTML = '';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'hindu-item';
+
+    var source = document.createElement('p');
+    source.className = 'hindu-source';
+    source.textContent = item.source;
+
+    var headline = document.createElement('a');
+    headline.className = 'hindu-headline';
+    headline.href = item.link;
+    headline.target = '_blank';
+    headline.rel = 'noopener';
+    headline.textContent = item.title;
+
+    var summary = document.createElement('p');
+    summary.className = 'hindu-summary';
+
+    wrap.appendChild(source);
+    wrap.appendChild(headline);
+    wrap.appendChild(summary);
+    list.appendChild(wrap);
+
+    fitText(summary, item.summary, list);
+
+    counter.textContent = (index + 1) + ' / ' + items.length;
+    prevBtn.disabled = items.length <= 1;
+    nextBtn.disabled = items.length <= 1;
+  }
+
+  prevBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index - 1 + items.length) % items.length;
+    renderCurrent();
+  });
+  nextBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index + 1) % items.length;
+    renderCurrent();
+  });
+
+  fetch(WORKER_URL + '/religion/hindu')
+    .then(function (res) {
+      if (!res.ok) throw new Error('worker error');
+      return res.json();
+    })
+    .then(function (data) {
+      if (data.status !== 'ok' || !data.items || !data.items.length) {
+        throw new Error('not ready yet');
+      }
+      items = data.items;
+      index = 0;
+      renderCurrent();
+    })
+    .catch(function () {
+      list.innerHTML = '<p class="hindu-error">Hindu world headlines unavailable right now — check back later.</p>';
+    });
+})();

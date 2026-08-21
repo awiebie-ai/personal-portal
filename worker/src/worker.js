@@ -17,6 +17,7 @@ const GOV_US_KV_KEY = 'gov-us';
 const JEWISH_KV_KEY = 'jewish';
 const CATHOLIC_KV_KEY = 'catholic';
 const ISLAMIC_KV_KEY = 'islamic';
+const HINDU_KV_KEY = 'hindu';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
@@ -75,6 +76,32 @@ const ISLAMIC_FEEDS = [
 ];
 const MEE_FEED_URL = 'https://www.middleeasteye.net/rss';
 const MEE_ITEM_COUNT = 3;
+
+// Right-column "Hinduism" card, same pattern as the three religion cards
+// above. Patheos' Hindu channel blogger is largely dormant (its feed's most
+// recent post is from 2021) but stays in the pool per the user's source
+// list, at a low count so a stale item rarely crowds out fresher ones.
+// Hindu American Foundation's <description> is just WordPress's
+// "The post ... appeared first on ..." boilerplate with no real excerpt, so
+// it falls back to the title (same `|| title` fallback every card here
+// already uses). ISKCON News's feed is unusually large (~2.5MB, 1000 items)
+// since it doesn't truncate, so it's fetched with a regex extractor that
+// stops scanning as soon as it has enough items, rather than paying to
+// parse the whole thing through the shared XMLParser. Hindu-blog.com is a
+// Blogger/Atom feed (feed/entry, not rss/channel/item), reached via its
+// Feedburner URL since Workers' fetch would otherwise need to follow a
+// redirect to get there.
+const HINDU_HEADLINE_COUNT = 7;
+const HINDU_SUMMARY_MAX = 170;
+const HINDU_FEEDS = [
+  { name: 'Hindu Press International', url: 'https://www.hinduismtoday.com/hpi/feed/', count: 3 },
+  { name: 'Hindu American Foundation', url: 'https://www.hinduamerican.org/feed/', count: 2 },
+  { name: 'Patheos — Hindu Channel', url: 'https://www.patheos.com/blogs/hindu2/feed/', count: 1 }
+];
+const ISKCON_FEED_URL = 'https://iskconnews.org/feed/';
+const ISKCON_ITEM_COUNT = 2;
+const HINDU_BLOG_FEED_URL = 'http://feeds.feedburner.com/hindublog';
+const HINDU_BLOG_ITEM_COUNT = 2;
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
 // branches. Sourced straight from official .gov/.gov-adjacent feeds — no
@@ -206,7 +233,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -217,9 +244,10 @@ export default {
         env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json'),
         env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json'),
         env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json')
+        env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(HINDU_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -262,6 +290,10 @@ export default {
       return jsonResponse(await getCached(env, ISLAMIC_KV_KEY), 200);
     }
 
+    if (url.pathname === '/religion/hindu') {
+      return jsonResponse(await getCached(env, HINDU_KV_KEY), 200);
+    }
+
     return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
@@ -297,7 +329,8 @@ async function refreshAll(env) {
     refreshGovRu(env),
     refreshJewish(env),
     refreshCatholic(env),
-    refreshIslamic(env)
+    refreshIslamic(env),
+    refreshHindu(env)
   ]);
 }
 
@@ -866,6 +899,118 @@ async function fetchMiddleEastEyeNews(count) {
       title,
       link: linkRaw.trim(),
       summary: truncateSummary(stripHtml(decoded), ISLAMIC_SUMMARY_MAX) || title
+    };
+  });
+}
+
+async function refreshHindu(env) {
+  try {
+    const items = await fetchHinduHeadlines();
+    await env.HEADLINES_KV.put(HINDU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('hindu refresh failed', err);
+  }
+}
+
+async function fetchHinduHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of HINDU_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: truncateSummary(stripHtml(String(item.description || '')), HINDU_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('hindu feed fetch failed', feed.url, err);
+    }
+  }
+
+  try {
+    candidates.push(...(await fetchIskconNews(ISKCON_ITEM_COUNT)));
+  } catch (err) {
+    console.error('hindu feed fetch failed', ISKCON_FEED_URL, err);
+  }
+
+  try {
+    candidates.push(...(await fetchHinduBlogPosts(HINDU_BLOG_ITEM_COUNT)));
+  } catch (err) {
+    console.error('hindu feed fetch failed', HINDU_BLOG_FEED_URL, err);
+  }
+
+  return dedupeByTitle(candidates).slice(0, HINDU_HEADLINE_COUNT);
+}
+
+// Regex-extracted rather than run through XMLParser: this feed doesn't cap
+// its item count (~1000 items, ~2.5MB), so this stops scanning as soon as
+// it has `count` items instead of building a parsed tree for the whole
+// thing.
+async function fetchIskconNews(count) {
+  const res = await fetch(ISKCON_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+  const xml = await res.text();
+
+  const itemRe = /<item>([\s\S]*?)<\/item>/g;
+  const results = [];
+  let match;
+  while ((match = itemRe.exec(xml)) && results.length < count) {
+    const block = match[1];
+    const titleRaw = (/<title>([\s\S]*?)<\/title>/.exec(block) || [, ''])[1];
+    const linkRaw = (/<link>([\s\S]*?)<\/link>/.exec(block) || [, ''])[1];
+    const descRaw = (/<description>([\s\S]*?)<\/description>/.exec(block) || [, ''])[1];
+    const title = stripHtml(decodeEntities(titleRaw));
+    results.push({
+      source: 'ISKCON News',
+      title,
+      link: linkRaw.trim(),
+      summary: truncateSummary(stripHtml(decodeEntities(descRaw)), HINDU_SUMMARY_MAX) || title
+    });
+  }
+  return results;
+}
+
+// Atom fields like <title type="text"> parse as { '#text', '@_type' }
+// objects rather than plain strings once ignoreAttributes:false is on —
+// same shape the Kremlin Atom feed's <summary> hits above.
+function atomFieldText(field) {
+  if (field && typeof field === 'object') return String(field['#text'] || '');
+  return String(field || '');
+}
+
+// Hindu-blog.com is a Blogger blog: Atom (feed/entry), not RSS. Each entry
+// carries three <link> elements (edit/self/alternate) — only "alternate" is
+// the actual article URL.
+async function fetchHinduBlogPosts(count) {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const res = await fetch(HINDU_BLOG_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+  const xml = await res.text();
+  const data = parser.parse(xml);
+  const rawEntries = data?.feed?.entry || [];
+  const entries = Array.isArray(rawEntries) ? rawEntries : [rawEntries];
+
+  return entries.slice(0, count).map((entry) => {
+    const links = Array.isArray(entry.link) ? entry.link : [entry.link];
+    const altLink = links.find((l) => l && l['@_rel'] === 'alternate') || links[0] || {};
+    const title = stripHtml(atomFieldText(entry.title));
+    return {
+      source: 'Hindu Blog',
+      title,
+      link: String(altLink['@_href'] || ''),
+      summary: truncateSummary(stripHtml(atomFieldText(entry.summary)), HINDU_SUMMARY_MAX) || title
     };
   });
 }
