@@ -53,6 +53,30 @@
 })();
 
 (function () {
+  var clocks = [
+    { el: document.getElementById('govTimeUs'), zone: 'America/New_York' },
+    { el: document.getElementById('govTimeCn'), zone: 'Asia/Shanghai' },
+    { el: document.getElementById('govTimeRu'), zone: 'Europe/Moscow' }
+  ];
+
+  function tick() {
+    var now = new Date();
+    clocks.forEach(function (clock) {
+      if (!clock.el) return;
+      clock.el.textContent = now.toLocaleTimeString('en-US', {
+        timeZone: clock.zone,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    });
+  }
+
+  tick();
+  setInterval(tick, 15000);
+})();
+
+(function () {
   var newsList = document.getElementById('newsList');
   var prevBtn = document.getElementById('newsPrev');
   var nextBtn = document.getElementById('newsNext');

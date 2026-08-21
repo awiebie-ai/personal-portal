@@ -190,16 +190,17 @@ export default {
     return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
-  // Cloudflare cron triggers only run on fixed UTC times, but "7:00 AM
+  // Cloudflare cron triggers only run on fixed UTC times, but "7:00 AM/PM
   // Eastern" shifts by an hour across the DST switch. Rather than juggle
-  // transition dates, both the EDT and EST equivalents (11:00 and 12:00 UTC)
-  // are registered as triggers below, and this handler only actually
-  // refreshes on whichever one currently lands at 7 AM America/New_York.
+  // transition dates, both the EDT and EST equivalents of each target hour
+  // (11:00/12:00 UTC for 7 AM, 23:00/00:00 UTC for 7 PM) are registered as
+  // triggers in wrangler.toml, and this handler only actually refreshes on
+  // whichever one currently lands at 7 AM or 7 PM America/New_York.
   async scheduled(event, env, ctx) {
     const hour = +new Intl.DateTimeFormat('en-US', {
       timeZone: 'America/New_York', hour: 'numeric', hourCycle: 'h23'
     }).format(new Date());
-    if (hour !== 7) return;
+    if (hour !== 7 && hour !== 19) return;
     ctx.waitUntil(refreshAll(env));
   }
 };

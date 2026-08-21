@@ -110,6 +110,14 @@ body {
   flex-shrink: 0;
 }
 .gov-heading { font-size: 15px; font-weight: 700; margin: 0; }
+.gov-time {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #8a8f98);
+  letter-spacing: 0.02em;
+}
 .gov-body {
   flex: 1;
   min-height: 0;
@@ -163,17 +171,37 @@ body {
   height: 40px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
   border-radius: 10px;
-  border: 1px solid #ddd;
-  background: #fff;
-  color: var(--ink);
+  border: 1px solid transparent;
+  color: #fff;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
   box-shadow: 0 4px 12px rgba(120, 84, 48, 0.06);
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
-.bookmark-btn:hover { border-color: var(--brand); color: var(--brand); }
+.bookmark-btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.bookmark-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.bookmark-label { overflow: hidden; text-overflow: ellipsis; }
+
+/* Per-site brand colors — update/reorder these alongside the bookmarks-nav
+   markup in index.html when the site list changes. */
+.bookmark-reddit { background: #ff4500; }
+.bookmark-digg { background: #000000; }
+.bookmark-fastmail { background: #0bc5c5; }
+.bookmark-github { background: #181717; }
+.bookmark-cloudflare { background: #f38020; }
+.bookmark-npr { background: #000000; }
+.bookmark-perplexity { background: #20808d; }
+.bookmark-whatsapp { background: #25d366; }
 
 .hero {
   position: relative;
