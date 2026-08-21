@@ -198,9 +198,19 @@
       </div>
 
       <aside class="col-side col-right">
-        <div class="card card-side">
-          <p class="card-side-eyebrow">Placeholder</p>
-          <h3 class="card-side-title">Card 1</h3>
+        <div class="card card-side card-jewish">
+          <div class="jewish-header">
+            <span class="jewish-emoji" aria-hidden="true">✡️</span>
+            <h3 class="jewish-heading">Judaism</h3>
+            <div class="jewish-toggler">
+              <button class="jewish-nav-btn" id="jewishPrev" type="button" aria-label="Previous headline" disabled>‹</button>
+              <span class="jewish-counter" id="jewishCounter">–</span>
+              <button class="jewish-nav-btn" id="jewishNext" type="button" aria-label="Next headline" disabled>›</button>
+            </div>
+          </div>
+          <div class="jewish-list" id="jewishList">
+            <p class="jewish-loading">Loading Jewish world headlines…</p>
+          </div>
         </div>
         <div class="card card-side">
           <p class="card-side-eyebrow">Placeholder</p>

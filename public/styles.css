@@ -20,6 +20,13 @@
   --goodnews-border: #d9ede0;
   --goodnews-accent: #2f855a;
   --goodnews-accent-2: #7dd39c;
+
+  /* Blue and white — the tallit/Star-of-David-flag colors traditionally
+     associated with Judaism. */
+  --jewish-tint: #f5f8fd;
+  --jewish-border: #dbe4f5;
+  --jewish-accent: #1a3fa0;
+  --jewish-accent-2: #6c9fe8;
 }
 
 * { box-sizing: border-box; }
@@ -159,6 +166,81 @@ body {
 .gov-item-title:hover { color: var(--brand); }
 .gov-item-summary { font-size: 11px; color: var(--muted); line-height: 1.5; margin: 0; }
 .gov-loading, .gov-error { font-size: 12px; color: var(--muted); }
+
+/* Right-column "Judaism" side card — JTA / Times of Israel / Jerusalem
+   Post / Arutz Sheva / Chabad.org headlines, one at a time behind a
+   news-card-style toggler, in the religion's traditional blue/white. */
+.card-jewish {
+  background: linear-gradient(90deg, var(--jewish-accent), var(--jewish-accent-2)) top / 100% 4px no-repeat, var(--jewish-tint);
+  border: 1px solid var(--jewish-border);
+}
+.card.card-jewish {
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  padding: 14px 16px;
+}
+.jewish-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+.jewish-emoji { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.jewish-heading { font-size: 15px; font-weight: 700; margin: 0; flex: 1; }
+.jewish-toggler {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.jewish-nav-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.jewish-nav-btn:hover { border-color: var(--jewish-accent); color: var(--jewish-accent); }
+.jewish-nav-btn:disabled { opacity: 0.35; cursor: default; border-color: #ddd; color: var(--ink); }
+.jewish-counter { font-size: 10.5px; color: var(--muted); min-width: 28px; text-align: center; }
+.jewish-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.jewish-item { flex-shrink: 0; }
+.jewish-source {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--jewish-accent);
+  margin: 0 0 4px;
+}
+.jewish-headline {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  margin: 0 0 6px;
+}
+.jewish-headline:hover { color: var(--jewish-accent); }
+.jewish-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+.jewish-loading, .jewish-error { font-size: 12px; color: var(--muted); }
 
 .bookmarks-nav {
   flex: 0 0 56px;

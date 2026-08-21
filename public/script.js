@@ -599,3 +599,90 @@
   // The Kremlin / Government of Russia, same daily refresh cycle.
   renderGovCard('govRuBody', '/gov/ru');
 })();
+
+(function () {
+  // Right-column "Judaism" card. Same Cloudflare Worker, /religion/jewish
+  // route (JTA, Times of Israel, Jerusalem Post, Arutz Sheva, Chabad.org
+  // pooled together). Same single-item toggler UX as the U.S. Headlines
+  // card above, so this mirrors that IIFE closely.
+  var list = document.getElementById('jewishList');
+  var prevBtn = document.getElementById('jewishPrev');
+  var nextBtn = document.getElementById('jewishNext');
+  var counter = document.getElementById('jewishCounter');
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+
+  var items = [];
+  var index = 0;
+
+  function fitText(el, fullText, container) {
+    el.textContent = fullText;
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    var words = fullText.split(' ');
+    while (words.length > 4 && container.scrollHeight > container.clientHeight) {
+      words.pop();
+      el.textContent = words.join(' ') + '…';
+    }
+  }
+
+  function renderCurrent() {
+    var item = items[index];
+    list.innerHTML = '';
+
+    var wrap = document.createElement('div');
+    wrap.className = 'jewish-item';
+
+    var source = document.createElement('p');
+    source.className = 'jewish-source';
+    source.textContent = item.source;
+
+    var headline = document.createElement('a');
+    headline.className = 'jewish-headline';
+    headline.href = item.link;
+    headline.target = '_blank';
+    headline.rel = 'noopener';
+    headline.textContent = item.title;
+
+    var summary = document.createElement('p');
+    summary.className = 'jewish-summary';
+
+    wrap.appendChild(source);
+    wrap.appendChild(headline);
+    wrap.appendChild(summary);
+    list.appendChild(wrap);
+
+    fitText(summary, item.summary, list);
+
+    counter.textContent = (index + 1) + ' / ' + items.length;
+    prevBtn.disabled = items.length <= 1;
+    nextBtn.disabled = items.length <= 1;
+  }
+
+  prevBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index - 1 + items.length) % items.length;
+    renderCurrent();
+  });
+  nextBtn.addEventListener('click', function () {
+    if (!items.length) return;
+    index = (index + 1) % items.length;
+    renderCurrent();
+  });
+
+  fetch(WORKER_URL + '/religion/jewish')
+    .then(function (res) {
+      if (!res.ok) throw new Error('worker error');
+      return res.json();
+    })
+    .then(function (data) {
+      if (data.status !== 'ok' || !data.items || !data.items.length) {
+        throw new Error('not ready yet');
+      }
+      items = data.items;
+      index = 0;
+      renderCurrent();
+    })
+    .catch(function () {
+      list.innerHTML = '<p class="jewish-error">Jewish world headlines unavailable right now — check back later.</p>';
+    });
+})();

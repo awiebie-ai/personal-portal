@@ -14,7 +14,24 @@ const TODOIST_KV_KEY = 'todoist';
 const CALENDAR_KV_KEY = 'calendar';
 const WEATHER_KV_KEY = 'weather';
 const GOV_US_KV_KEY = 'gov-us';
+const JEWISH_KV_KEY = 'jewish';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
+
+// Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
+// outlets, mirroring the gov cards' cheap approach (feed title + trimmed
+// feed description, no per-article Claude summarization). Times of Israel
+// and Chabad.org both sit behind Cloudflare bot protection that blocks some
+// non-browser traffic, so each feed is fetched independently and a failure
+// there just means fewer candidates from that source, not a blank card.
+const JEWISH_HEADLINE_COUNT = 7;
+const JEWISH_SUMMARY_MAX = 170;
+const JEWISH_FEEDS = [
+  { name: 'JTA', url: 'https://www.jta.org/feed', count: 3 },
+  { name: 'The Times of Israel', url: 'https://www.timesofisrael.com/feed/', count: 2 },
+  { name: 'The Jerusalem Post', url: 'https://www.jpost.com/rss/rssfeedsfrontpage.aspx', count: 3 },
+  { name: 'Arutz Sheva', url: 'https://www.israelnationalnews.com/Rss.aspx', count: 2 },
+  { name: 'Chabad.org', url: 'https://www.chabad.org/tools/rss/dailystudy_podcast.xml', count: 1 }
+];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
 // branches. Sourced straight from official .gov/.gov-adjacent feeds — no
@@ -146,7 +163,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -154,9 +171,10 @@ export default {
         env.HEADLINES_KV.get(WEATHER_KV_KEY, 'json'),
         env.HEADLINES_KV.get(GOV_US_KV_KEY, 'json'),
         env.HEADLINES_KV.get(GOV_CN_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json')
+        env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -185,6 +203,10 @@ export default {
 
     if (url.pathname === '/gov/ru') {
       return jsonResponse(await getCached(env, GOV_RU_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/religion/jewish') {
+      return jsonResponse(await getCached(env, JEWISH_KV_KEY), 200);
     }
 
     return jsonResponse(await getCached(env, KV_KEY), 200);
@@ -219,7 +241,8 @@ async function refreshAll(env) {
     refreshWeather(env),
     refreshGovUs(env),
     refreshGovCn(env),
-    refreshGovRu(env)
+    refreshGovRu(env),
+    refreshJewish(env)
   ]);
 }
 
@@ -340,10 +363,14 @@ async function refreshGovUs(env) {
   }
 }
 
-function truncateSummary(text) {
-  const clean = text.replace(/\s*The post.*$/is, '').trim();
-  if (clean.length <= GOV_SUMMARY_MAX) return clean;
-  return clean.slice(0, GOV_SUMMARY_MAX).replace(/\s+\S*$/, '') + '…';
+function truncateSummary(text, maxLen) {
+  const limit = maxLen || GOV_SUMMARY_MAX;
+  // WordPress-fed sources (e.g. JTA) prefix "The post ... appeared first on
+  // ..." with a bare "--" separator line, which the first replace alone
+  // leaves dangling.
+  const clean = text.replace(/\s*The post.*$/is, '').replace(/\s*--\s*$/, '').trim();
+  if (clean.length <= limit) return clean;
+  return clean.slice(0, limit).replace(/\s+\S*$/, '') + '…';
 }
 
 async function fetchWhiteHouseReleases() {
@@ -581,6 +608,49 @@ async function fetchGovernmentRuNews() {
       link: String(item.link || '')
     };
   });
+}
+
+async function refreshJewish(env) {
+  try {
+    const items = await fetchJewishHeadlines();
+    await env.HEADLINES_KV.put(JEWISH_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('jewish refresh failed', err);
+  }
+}
+
+// Same per-feed try/catch loop as refreshHeadlines below, so one blocked
+// source (ToI and Chabad both sit behind Cloudflare bot checks that can
+// reject non-browser traffic) just means fewer candidates from it rather
+// than failing the whole card.
+async function fetchJewishHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of JEWISH_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: truncateSummary(stripHtml(String(item.description || '')), JEWISH_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('jewish feed fetch failed', feed.url, err);
+    }
+  }
+
+  return dedupeByTitle(candidates).slice(0, JEWISH_HEADLINE_COUNT);
 }
 
 async function refreshHeadlines(env) {
