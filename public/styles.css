@@ -27,6 +27,13 @@
   --jewish-border: #dbe4f5;
   --jewish-accent: #1a3fa0;
   --jewish-accent-2: #6c9fe8;
+
+  /* Gold and white — the Vatican flag / papal colors traditionally
+     associated with Roman Catholicism. */
+  --catholic-tint: #fdfbf4;
+  --catholic-border: #ecdfb8;
+  --catholic-accent: #a3791a;
+  --catholic-accent-2: #e8c874;
 }
 
 * { box-sizing: border-box; }
@@ -241,6 +248,82 @@ body {
 .jewish-headline:hover { color: var(--jewish-accent); }
 .jewish-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
 .jewish-loading, .jewish-error { font-size: 12px; color: var(--muted); }
+
+/* Right-column "Catholicism" side card — Vatican News / Catholic News
+   Agency / OSV News / National Catholic Register / USCCB headlines, same
+   toggler UX as the Judaism card above, in the religion's traditional
+   gold/white. */
+.card-catholic {
+  background: linear-gradient(90deg, var(--catholic-accent), var(--catholic-accent-2)) top / 100% 4px no-repeat, var(--catholic-tint);
+  border: 1px solid var(--catholic-border);
+}
+.card.card-catholic {
+  justify-content: flex-start;
+  align-items: stretch;
+  text-align: left;
+  padding: 14px 16px;
+}
+.catholic-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-bottom: 10px;
+}
+.catholic-emoji { font-size: 22px; line-height: 1; flex-shrink: 0; }
+.catholic-heading { font-size: 15px; font-weight: 700; margin: 0; flex: 1; }
+.catholic-toggler {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.catholic-nav-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #ddd;
+  background: #fff;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.catholic-nav-btn:hover { border-color: var(--catholic-accent); color: var(--catholic-accent); }
+.catholic-nav-btn:disabled { opacity: 0.35; cursor: default; border-color: #ddd; color: var(--ink); }
+.catholic-counter { font-size: 10.5px; color: var(--muted); min-width: 28px; text-align: center; }
+.catholic-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.catholic-item { flex-shrink: 0; }
+.catholic-source {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--catholic-accent);
+  margin: 0 0 4px;
+}
+.catholic-headline {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--ink);
+  text-decoration: none;
+  margin: 0 0 6px;
+}
+.catholic-headline:hover { color: var(--catholic-accent); }
+.catholic-summary { font-size: 11.5px; color: var(--muted); line-height: 1.5; margin: 0; }
+.catholic-loading, .catholic-error { font-size: 12px; color: var(--muted); }
 
 .bookmarks-nav {
   flex: 0 0 56px;

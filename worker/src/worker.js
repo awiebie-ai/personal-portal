@@ -15,6 +15,7 @@ const CALENDAR_KV_KEY = 'calendar';
 const WEATHER_KV_KEY = 'weather';
 const GOV_US_KV_KEY = 'gov-us';
 const JEWISH_KV_KEY = 'jewish';
+const CATHOLIC_KV_KEY = 'catholic';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
@@ -32,6 +33,25 @@ const JEWISH_FEEDS = [
   { name: 'Arutz Sheva', url: 'https://www.israelnationalnews.com/Rss.aspx', count: 2 },
   { name: 'Chabad.org', url: 'https://www.chabad.org/tools/rss/dailystudy_podcast.xml', count: 1 }
 ];
+
+// Right-column "Catholicism" card, same pattern as the Judaism card above.
+// OSV News sits behind Cloudflare bot protection like ToI/Chabad.org do.
+// National Catholic Register's <description> is just the literal word
+// "news" (real text lives in <content:encoded>), handled in
+// catholicCandidateSummary below. USCCB's feed is fetched separately with a
+// regex extractor instead of the shared XMLParser — its escaped-HTML
+// descriptions across ~50 items trip fast-xml-parser's entity-expansion
+// guard the same way the Congressional Record feed's did.
+const CATHOLIC_HEADLINE_COUNT = 7;
+const CATHOLIC_SUMMARY_MAX = 170;
+const CATHOLIC_FEEDS = [
+  { name: 'Vatican News', url: 'https://www.vaticannews.va/en.rss.xml', count: 3 },
+  { name: 'Catholic News Agency', url: 'https://www.catholicnewsagency.com/rss/news.xml', count: 3 },
+  { name: 'OSV News', url: 'https://www.osvnews.com/feed/', count: 2 },
+  { name: 'National Catholic Register', url: 'https://www.ncregister.com/feeds/general-news.xml', count: 2 }
+];
+const USCCB_FEED_URL = 'https://www.usccb.org/news.rss';
+const USCCB_ITEM_COUNT = 1;
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
 // branches. Sourced straight from official .gov/.gov-adjacent feeds — no
@@ -163,7 +183,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -172,9 +192,10 @@ export default {
         env.HEADLINES_KV.get(GOV_US_KV_KEY, 'json'),
         env.HEADLINES_KV.get(GOV_CN_KV_KEY, 'json'),
         env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json')
+        env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -207,6 +228,10 @@ export default {
 
     if (url.pathname === '/religion/jewish') {
       return jsonResponse(await getCached(env, JEWISH_KV_KEY), 200);
+    }
+
+    if (url.pathname === '/religion/catholic') {
+      return jsonResponse(await getCached(env, CATHOLIC_KV_KEY), 200);
     }
 
     return jsonResponse(await getCached(env, KV_KEY), 200);
@@ -242,7 +267,8 @@ async function refreshAll(env) {
     refreshGovUs(env),
     refreshGovCn(env),
     refreshGovRu(env),
-    refreshJewish(env)
+    refreshJewish(env),
+    refreshCatholic(env)
   ]);
 }
 
@@ -651,6 +677,89 @@ async function fetchJewishHeadlines() {
   }
 
   return dedupeByTitle(candidates).slice(0, JEWISH_HEADLINE_COUNT);
+}
+
+async function refreshCatholic(env) {
+  try {
+    const items = await fetchCatholicHeadlines();
+    await env.HEADLINES_KV.put(CATHOLIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('catholic refresh failed', err);
+  }
+}
+
+// National Catholic Register's <description> is a placeholder ("news");
+// the real excerpt lives in <content:encoded>, with a lead <figure> (image
+// + caption + photo credit) that would otherwise get jumbled in with the
+// actual article text once tags are stripped.
+function catholicCandidateSummary(item, maxLen) {
+  let raw = stripHtml(String(item.description || ''));
+  if (raw.length < 30) {
+    const encoded = String(item['content:encoded'] || '').replace(/<figure[\s\S]*?<\/figure>/gi, '');
+    raw = stripHtml(encoded);
+  }
+  return truncateSummary(raw, maxLen);
+}
+
+async function fetchCatholicHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of CATHOLIC_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: catholicCandidateSummary(item, CATHOLIC_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('catholic feed fetch failed', feed.url, err);
+    }
+  }
+
+  try {
+    candidates.push(...(await fetchUsccbNews(USCCB_ITEM_COUNT)));
+  } catch (err) {
+    console.error('catholic feed fetch failed', USCCB_FEED_URL, err);
+  }
+
+  return dedupeByTitle(candidates).slice(0, CATHOLIC_HEADLINE_COUNT);
+}
+
+// Regex-extracted rather than run through XMLParser: USCCB's feed packs
+// escaped-HTML <description> blocks across ~50 items, enough entity
+// references to trip fast-xml-parser's entity-expansion guard (same issue
+// as the Congressional Record feed above, which sidesteps it by discarding
+// <description> entirely — not an option here since this card wants it).
+async function fetchUsccbNews(count) {
+  const res = await fetch(USCCB_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+  const xml = await res.text();
+  const itemBlocks = xml.match(/<item>[\s\S]*?<\/item>/g) || [];
+
+  return itemBlocks.slice(0, count).map((block) => {
+    const titleRaw = (/<title>([\s\S]*?)<\/title>/.exec(block) || [, ''])[1];
+    const linkRaw = (/<link>([\s\S]*?)<\/link>/.exec(block) || [, ''])[1];
+    const descRaw = (/<description>([\s\S]*?)<\/description>/.exec(block) || [, ''])[1];
+    const title = stripHtml(decodeEntities(titleRaw));
+    return {
+      source: 'USCCB',
+      title,
+      link: linkRaw.trim(),
+      summary: truncateSummary(stripHtml(decodeEntities(descRaw)), CATHOLIC_SUMMARY_MAX) || title
+    };
+  });
 }
 
 async function refreshHeadlines(env) {
