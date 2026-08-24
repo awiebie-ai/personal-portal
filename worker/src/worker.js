@@ -19,6 +19,7 @@ const CATHOLIC_KV_KEY = 'catholic';
 const ISLAMIC_KV_KEY = 'islamic';
 const HINDU_KV_KEY = 'hindu';
 const BUDDHIST_KV_KEY = 'buddhist';
+const GOODNEWS_KV_KEY = 'goodnews';
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 
 // Right-column "Judaism" card: pooled headlines across five Jewish/Israeli
@@ -121,6 +122,21 @@ const BUDDHIST_FEEDS = [
   { name: 'Tricycle', url: 'https://tricycle.org/feed/', count: 3 },
   { name: 'Religion Unplugged', url: 'https://religionunplugged.com/news?format=rss', count: 2, filterBuddhism: true },
   { name: 'Buddhistdoor Global', url: 'https://www.buddhistdoor.net/feed/', count: 2 }
+];
+
+// Center-column "Good News" cover-flow card: pooled highlights across five
+// solutions-journalism/feel-good outlets, same pooling pattern as the
+// religion cards above. Sunny Skyz's <description> is just a lead image
+// with no text and no richer field to fall back to (unlike Catholic's
+// content:encoded), so it relies on the shared `|| title` fallback below.
+const GOODNEWS_HEADLINE_COUNT = 8;
+const GOODNEWS_SUMMARY_MAX = 400;
+const GOODNEWS_FEEDS = [
+  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 3 },
+  { name: 'Positive News', url: 'https://www.positive.news/feed/', count: 2 },
+  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 2 },
+  { name: 'Upworthy', url: 'https://www.upworthy.com/feed/', count: 2 },
+  { name: 'Sunny Skyz', url: 'https://www.sunnyskyz.com/rss_tebow.php', count: 2 }
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
@@ -253,7 +269,7 @@ export default {
         return jsonResponse({ status: 'error', message: 'unauthorized' }, 401);
       }
       await refreshAll(env);
-      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist] = await Promise.all([
+      const [headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist, goodNews] = await Promise.all([
         env.HEADLINES_KV.get(KV_KEY, 'json'),
         env.HEADLINES_KV.get(GITHUB_KV_KEY, 'json'),
         env.HEADLINES_KV.get(TODOIST_KV_KEY, 'json'),
@@ -266,9 +282,10 @@ export default {
         env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json'),
         env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json'),
         env.HEADLINES_KV.get(HINDU_KV_KEY, 'json'),
-        env.HEADLINES_KV.get(BUDDHIST_KV_KEY, 'json')
+        env.HEADLINES_KV.get(BUDDHIST_KV_KEY, 'json'),
+        env.HEADLINES_KV.get(GOODNEWS_KV_KEY, 'json')
       ]);
-      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist }, 200);
+      return jsonResponse({ status: 'ok', headlines, github, todoist, calendar, weather, govUs, govCn, govRu, jewish, catholic, islamic, hindu, buddhist, goodNews }, 200);
     }
 
     if (url.pathname === '/github') {
@@ -319,6 +336,10 @@ export default {
       return jsonResponse(await getCached(env, BUDDHIST_KV_KEY), 200);
     }
 
+    if (url.pathname === '/good-news') {
+      return jsonResponse(await getCached(env, GOODNEWS_KV_KEY), 200);
+    }
+
     return jsonResponse(await getCached(env, KV_KEY), 200);
   },
 
@@ -356,7 +377,8 @@ async function refreshAll(env) {
     refreshCatholic(env),
     refreshIslamic(env),
     refreshHindu(env),
-    refreshBuddhist(env)
+    refreshBuddhist(env),
+    refreshGoodNews(env)
   ]);
 }
 
@@ -1050,6 +1072,15 @@ async function refreshBuddhist(env) {
   }
 }
 
+async function refreshGoodNews(env) {
+  try {
+    const items = await fetchGoodNewsHeadlines();
+    await env.HEADLINES_KV.put(GOODNEWS_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+  } catch (err) {
+    console.error('good news refresh failed', err);
+  }
+}
+
 function itemIsBuddhismRelevant(item) {
   const rawCategory = item.category;
   const cats = Array.isArray(rawCategory) ? rawCategory : (rawCategory ? [rawCategory] : []);
@@ -1086,6 +1117,36 @@ async function fetchBuddhistHeadlines() {
   }
 
   return dedupeByTitle(candidates).slice(0, BUDDHIST_HEADLINE_COUNT);
+}
+
+async function fetchGoodNewsHeadlines() {
+  const parser = new XMLParser({ ignoreAttributes: false });
+  const candidates = [];
+
+  for (const feed of GOODNEWS_FEEDS) {
+    try {
+      const res = await fetch(feed.url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+      if (!res.ok) throw new Error('feed fetch failed: ' + res.status);
+      const xml = await res.text();
+      const data = parser.parse(xml);
+      const rawItems = data?.rss?.channel?.item || [];
+      const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+
+      items.slice(0, feed.count).forEach((item) => {
+        const title = stripHtml(String(item.title || ''));
+        candidates.push({
+          source: feed.name,
+          title,
+          link: String(item.link || ''),
+          summary: truncateSummary(stripHtml(String(item.description || '')), GOODNEWS_SUMMARY_MAX) || title
+        });
+      });
+    } catch (err) {
+      console.error('good news feed fetch failed', feed.url, err);
+    }
+  }
+
+  return dedupeByTitle(candidates).slice(0, GOODNEWS_HEADLINE_COUNT);
 }
 
 async function refreshHeadlines(env) {
