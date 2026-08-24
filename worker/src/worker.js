@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { extractText, getDocumentProxy } from 'unpdf';
 
 const FEEDS = [
   'https://www.cbsnews.com/latest/rss/main',
@@ -143,9 +144,11 @@ const GOODNEWS_FEEDS = [
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
-// branches. Sourced straight from official .gov/.gov-adjacent feeds — no
-// Claude summarization here, just cleaned-up excerpts, to keep this card
-// cheap and simple per the original spec.
+// branches. White House and Supreme Court items get a full-text Claude
+// summary (see summarizeGovRelease/summarizeScotusOpinion) since their raw
+// source text — a one-line RSS teaser, or a docket "title" attribute — is
+// too thin to fill the card. Congress stays on a fixed boilerplate line;
+// there's no per-issue text worth summarizing (see fetchCongressRecord).
 const GOV_BRANCH_ITEM_COUNT = 3;
 // Cards show one story at a time (see gov-body in script.js) rather than a
 // scrollable list, so there's much more room per item than the old 220-char
@@ -490,9 +493,9 @@ async function fetchWeatherCities() {
 async function refreshGovUs(env) {
   try {
     const [whiteHouse, congress, scotus] = await Promise.all([
-      fetchWhiteHouseReleases(),
+      fetchWhiteHouseReleases(env),
       fetchCongressRecord(),
-      fetchScotusOpinions()
+      fetchScotusOpinions(env)
     ]);
     const branches = [
       { name: 'White House', items: whiteHouse },
@@ -515,7 +518,10 @@ function truncateSummary(text, maxLen) {
   return clean.slice(0, limit).replace(/\s+\S*$/, '') + '…';
 }
 
-async function fetchWhiteHouseReleases() {
+// The feed's own <description> is a one-line teaser, nowhere near enough to
+// fill the card. Each release's full text is fetched and summarized by
+// Claude instead, the same pattern refreshHeadlines uses for the news card.
+async function fetchWhiteHouseReleases(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const res = await fetch(WHITEHOUSE_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const xml = await res.text();
@@ -523,11 +529,84 @@ async function fetchWhiteHouseReleases() {
   const rawItems = data?.rss?.channel?.item || [];
   const items = Array.isArray(rawItems) ? rawItems : [rawItems];
 
-  return items.slice(0, GOV_BRANCH_ITEM_COUNT).map((item) => ({
+  const candidates = items.slice(0, GOV_BRANCH_ITEM_COUNT).map((item) => ({
     title: stripHtml(String(item.title || '')),
-    summary: truncateSummary(stripHtml(String(item.description || ''))),
+    description: stripHtml(String(item.description || '')),
     link: String(item.link || '')
   }));
+
+  const results = [];
+  for (const item of candidates) {
+    let summary = truncateSummary(item.description) || item.title;
+    try {
+      const articleText = await fetchArticleText(item.link);
+      if (articleText && articleText.length >= 200 && !BLOCK_PATTERNS.test(articleText)) {
+        summary = await summarizeGovRelease(env, item.title, articleText);
+      }
+    } catch (err) {
+      console.error('white house article summarize failed', item.link, err);
+    }
+    results.push({ title: item.title, summary, link: item.link });
+  }
+  return results;
+}
+
+// Longer and more detailed than summarizeWithClaude's news-card summaries —
+// this card shows one full release at a time with a lot of vertical room to
+// fill, so the prompt asks for enough substance to actually use it.
+async function summarizeGovRelease(env, title, articleText) {
+  const prompt =
+    'Summarize this White House press release in 4-6 sentences. ' +
+    'Cover what was announced or done, the key details, the stated reasoning ' +
+    'behind it, and why it matters, so someone who has not read the original ' +
+    'comes away well informed. Be neutral and factual. ' +
+    'Respond with plain prose only: no markdown, no headers, no bullet points, no preamble.\n\n' +
+    'Headline: ' + title + '\n\n' +
+    'Article text:\n' + articleText;
+
+  return (await callClaude(env, prompt, 400)) || title;
+}
+
+// Same longer-form treatment as summarizeGovRelease, tuned for legal opinion
+// text (the syllabus/majority/dissent structure) rather than a press release.
+async function summarizeScotusOpinion(env, caseTitle, opinionText) {
+  const prompt =
+    'Summarize this U.S. Supreme Court opinion in 4-6 sentences. ' +
+    'Explain what the case was about, how the Court ruled, the key legal ' +
+    'reasoning behind the decision, and why it matters, so someone who has ' +
+    'not read the opinion comes away well informed. Be neutral and factual. ' +
+    'Respond with plain prose only: no markdown, no headers, no bullet points, no preamble.\n\n' +
+    'Case: ' + caseTitle + '\n\n' +
+    'Opinion text:\n' + opinionText;
+
+  return (await callClaude(env, prompt, 400)) || caseTitle;
+}
+
+// Shared by summarizeWithClaude/summarizeGovRelease/summarizeScotusOpinion —
+// just the API call and response-text extraction; each caller supplies its
+// own prompt and fallback.
+async function callClaude(env, prompt, maxTokens) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      'x-api-key': env.ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: CLAUDE_MODEL,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!res.ok) {
+    throw new Error('Claude API error: ' + res.status + ' ' + (await res.text()));
+  }
+  const data = await res.json();
+  const text = (data.content && data.content[0] && data.content[0].text || '').trim();
+  // Defensive cleanup in case the model still opens with a heading despite instructions.
+  return text.replace(/^#+\s*summary\s*\n+/i, '').trim();
 }
 
 // govinfo's "new items" feed isn't ordered by the Record's own date, so it's
@@ -565,30 +644,61 @@ async function fetchCongressRecord() {
 // supremecourt.gov has no working RSS feed for opinions, so this scrapes the
 // slip-opinion table directly (server-rendered HTML, newest row first). The
 // row regex mirrors the fixed markup GET /opinions/slipopinion/<term> emits.
-async function fetchScotusOpinions() {
+// Each row's `title` attribute (the `teaser` fallback below) is just a short
+// docket label (e.g. "Per Curiam"), not real summary text — the slip
+// opinion itself is a PDF, fetched and run through Claude for a real one.
+async function fetchScotusOpinions(env) {
   const res = await fetch(SCOTUS_OPINIONS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const html = await res.text();
 
   const rowRe = /<tr>\s*<td[^>]*>\d*<\/td>\s*<td[^>]*>([\d/]+)<\/td>\s*<td[^>]*>[^<]*<\/td>\s*<td[^>]*><a href='([^']+)'[^>]*title="([^"]*)">([^<]+)<\/a>/g;
 
-  const results = [];
+  const candidates = [];
   let match;
-  while ((match = rowRe.exec(html)) && results.length < GOV_BRANCH_ITEM_COUNT) {
+  while ((match = rowRe.exec(html)) && candidates.length < GOV_BRANCH_ITEM_COUNT) {
     const [, date, href, title, caseName] = match;
-    results.push({
+    candidates.push({
       title: decodeEntities(caseName) + ' (' + date + ')',
-      summary: truncateSummary(decodeEntities(title)),
+      teaser: truncateSummary(decodeEntities(title)),
       link: href.startsWith('http') ? href : 'https://www.supremecourt.gov' + href
     });
   }
+
+  const results = [];
+  for (const item of candidates) {
+    let summary = item.teaser || item.title;
+    try {
+      const opinionText = await fetchPdfText(item.link);
+      if (opinionText && opinionText.length >= 200) {
+        summary = await summarizeScotusOpinion(env, item.title, opinionText);
+      }
+    } catch (err) {
+      console.error('scotus opinion summarize failed', item.link, err);
+    }
+    results.push({ title: item.title, summary, link: item.link });
+  }
   return results;
+}
+
+// Slip opinions open with a Reporter-of-Decisions syllabus that already
+// reads like a summary, so capping at 6000 chars (same cap fetchArticleText
+// uses for HTML articles) naturally keeps the syllabus plus the start of
+// the majority opinion rather than pulling in unrelated dissents/appendices.
+async function fetchPdfText(url) {
+  if (!url) return '';
+  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  if (!res.ok) return '';
+  const buffer = await res.arrayBuffer();
+  const pdf = await getDocumentProxy(new Uint8Array(buffer));
+  const { text } = await extractText(pdf, { mergePages: true });
+  return text.replace(/\s+/g, ' ').trim().slice(0, 6000);
 }
 
 async function refreshGovCn(env) {
   try {
     const [xinhua, stateCouncil] = await Promise.all([
-      fetchXinhuaArticles(),
-      fetchStateCouncilArticles()
+      fetchXinhuaArticles(env),
+      fetchStateCouncilArticles(env)
     ]);
     const branches = [
       { name: 'Xinhua', items: xinhua },
@@ -603,7 +713,7 @@ async function refreshGovCn(env) {
 // Xinhua's China index mixes today's stories in with older "evergreen"
 // features, so items are sorted by the date embedded in their own URL
 // (../YYYYMMDD/.../c.html) rather than trusted on page order.
-async function fetchXinhuaArticles() {
+async function fetchXinhuaArticles(env) {
   const res = await fetch(XINHUA_CHINA_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const html = await res.text();
   const rowRe = /<a href="(\.\.\/(\d{8})\/[^"]+)"[^>]*>([^<]{8,})<\/a>/g;
@@ -619,10 +729,10 @@ async function fetchXinhuaArticles() {
   }
   candidates.sort((a, b) => b.date.localeCompare(a.date));
 
-  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT));
+  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT), env);
 }
 
-async function fetchStateCouncilArticles() {
+async function fetchStateCouncilArticles(env) {
   const res = await fetch(STATE_COUNCIL_NEWS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const html = await res.text();
   const rowRe = /<a shape="rect" href="(\/\/english\.www\.gov\.cn\/news\/(\d{6})\/(\d{2})\/content_[^"]+)">([^<]{8,})<\/a>/g;
@@ -638,15 +748,22 @@ async function fetchStateCouncilArticles() {
   }
   candidates.sort((a, b) => b.date.localeCompare(a.date));
 
-  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT));
+  return fillArticleSummaries(candidates.slice(0, GOV_CN_SOURCE_ITEM_COUNT), env);
 }
 
-async function fillArticleSummaries(items) {
+// Each article's full text (already boilerplate-stripped by
+// fetchArticleParagraphs) is run through Claude for a real summary, same
+// full-text treatment as the White House/SCOTUS items on the US card. Falls
+// back to a plain truncated excerpt if the fetch or summarization fails.
+async function fillArticleSummaries(items, env) {
   const results = [];
   for (const item of items) {
     let summary = '';
     try {
-      summary = truncateSummary(await fetchArticleParagraphs(item.link));
+      const articleText = await fetchArticleParagraphs(item.link, CN_PARAGRAPH_SKIP_RE);
+      summary = articleText && articleText.length >= 200
+        ? await summarizeGovArticle(env, 'Chinese state media', item.title, articleText)
+        : truncateSummary(articleText);
     } catch (err) {
       console.error('article fetch failed', item.link, err);
     }
@@ -655,12 +772,37 @@ async function fillArticleSummaries(items) {
   return results;
 }
 
+// Shared by the China and Russia government cards — same longer-form
+// treatment as summarizeGovRelease/summarizeScotusOpinion on the US card,
+// generalized with a `sourceLabel` since neither is a US press release or
+// legal opinion.
+async function summarizeGovArticle(env, sourceLabel, title, articleText) {
+  const prompt =
+    'Summarize this article from ' + sourceLabel + ' in 4-6 sentences. ' +
+    'Cover what happened or was announced, the key details, who or what ' +
+    'was involved, and why it matters, so someone who has not read the ' +
+    'original comes away well informed. Be neutral and factual. ' +
+    'Respond with plain prose only: no markdown, no headers, no bullet points, no preamble.\n\n' +
+    'Headline: ' + title + '\n\n' +
+    'Article text:\n' + articleText;
+
+  return (await callClaude(env, prompt, 400)) || title;
+}
+
+// Xinhua/State Council templates put boilerplate ("Source: Xinhua", the
+// State Council's "App" download link, an inline date-injection <script>)
+// inside <p> tags themselves, hence the class filter.
+const CN_PARAGRAPH_SKIP_RE = /^(source|editor|time)$|^Top_/i;
+
+// government.ru's article template similarly puts nav/footer chrome (a
+// search-box placeholder, photo-gallery date captions, the newsletter
+// signup block) inside <p> tags — same problem, different class names.
+const GOVRU_PARAGRAPH_SKIP_RE = /^(figure_caption_title|gallery_item_meta|label|message|page_header_search_example|subscribe_info-msg|calendar-footer(-text|-archive|-subscribe)?)$/i;
+
 // Separate from fetchArticleText below (used by the main headlines card,
-// which feeds Claude and tolerates noisy input) because these sites'
-// templates put boilerplate ("Source: Xinhua", the State Council's "App"
-// download link, an inline date-injection <script>) inside <p> tags
-// themselves, which would otherwise leak into a summary nobody summarizes.
-async function fetchArticleParagraphs(url) {
+// which feeds Claude and tolerates noisy input) because these sites need
+// the per-<p> class filtering above, which fetchArticleText doesn't do.
+async function fetchArticleParagraphs(url, skipClassRe) {
   if (!url) return '';
   const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const contentType = res.headers.get('content-type') || '';
@@ -679,7 +821,7 @@ async function fetchArticleParagraphs(url) {
     .on('p', {
       element(el) {
         const cls = el.getAttribute('class') || '';
-        skipParagraph = /^(source|editor|time)$/i.test(cls) || /^Top_/i.test(cls);
+        skipParagraph = skipClassRe.test(cls);
       },
       text(chunk) {
         if (!skipParagraph && !insideScript) text += chunk.text;
@@ -688,14 +830,14 @@ async function fetchArticleParagraphs(url) {
     .transform(res)
     .arrayBuffer();
 
-  return text.replace(/\s+/g, ' ').trim();
+  return text.replace(/\s+/g, ' ').trim().slice(0, 6000);
 }
 
 async function refreshGovRu(env) {
   try {
     const [kremlin, governmentRu] = await Promise.all([
-      fetchKremlinNews(),
-      fetchGovernmentRuNews()
+      fetchKremlinNews(env),
+      fetchGovernmentRuNews(env)
     ]);
     const branches = [
       { name: 'The Kremlin', items: kremlin },
@@ -709,31 +851,48 @@ async function refreshGovRu(env) {
 
 // Atom feed, not RSS — entries live at feed.entry. <summary> is just a lead
 // image's alt caption with no real text; the actual article body lives in
-// <content> instead, entity-escaped (&lt;p&gt;...). Extracted with a regex
-// per entry rather than the shared XMLParser: parsing <content> for all 20
-// entries in one pass blows fast-xml-parser's entity-expansion guard, same
-// issue as the Congressional Record feed above.
-async function fetchKremlinNews() {
+// <content> instead, entity-escaped (&lt;p&gt;...), and is already the full
+// transcript/readout (unlike government.ru's feed below), so no extra page
+// fetch is needed — just run it through Claude instead of truncating.
+// Extracted with a regex per entry rather than the shared XMLParser: parsing
+// <content> for all 20 entries in one pass blows fast-xml-parser's
+// entity-expansion guard, same issue as the Congressional Record feed above.
+async function fetchKremlinNews(env) {
   const res = await fetch(KREMLIN_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const xml = await res.text();
   const entryBlocks = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
 
-  return entryBlocks.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((block) => {
+  const candidates = entryBlocks.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((block) => {
     const titleRaw = (/<title>([\s\S]*?)<\/title>/.exec(block) || [, ''])[1];
     const linkRaw = (/<link href="([^"]+)"/.exec(block) || [, ''])[1];
     const contentRaw = (/<content[^>]*>([\s\S]*?)<\/content>/.exec(block) || [, ''])[1];
     const idRaw = (/<id>([\s\S]*?)<\/id>/.exec(block) || [, ''])[1];
-    const title = stripHtml(decodeEntities(titleRaw));
-    const content = stripHtml(decodeEntities(contentRaw)).replace(/\s+/g, ' ').trim();
     return {
-      title,
-      summary: truncateSummary(content) || title,
+      title: stripHtml(decodeEntities(titleRaw)),
+      content: stripHtml(decodeEntities(contentRaw)).replace(/\s+/g, ' ').trim().slice(0, 6000),
       link: linkRaw || idRaw
     };
   });
+
+  const results = [];
+  for (const item of candidates) {
+    let summary = truncateSummary(item.content) || item.title;
+    try {
+      if (item.content.length >= 200) {
+        summary = await summarizeGovArticle(env, 'the Kremlin', item.title, item.content);
+      }
+    } catch (err) {
+      console.error('kremlin article summarize failed', item.link, err);
+    }
+    results.push({ title: item.title, summary, link: item.link });
+  }
+  return results;
 }
 
-async function fetchGovernmentRuNews() {
+// Unlike the Kremlin's Atom feed above, government.ru's RSS <description>
+// is just a one-line teaser — the full readout lives on the article page,
+// so it's fetched and summarized the same way the China card's sources are.
+async function fetchGovernmentRuNews(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const res = await fetch(GOVERNMENT_RU_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   const xml = await res.text();
@@ -741,19 +900,31 @@ async function fetchGovernmentRuNews() {
   const rawItems = data?.rss?.channel?.item || [];
   const items = Array.isArray(rawItems) ? rawItems : [rawItems];
 
-  return items.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((item) => {
-    const title = stripHtml(String(item.title || ''));
-    return {
-      title,
-      summary: truncateSummary(stripHtml(String(item.description || ''))) || title,
-      link: String(item.link || '')
-    };
-  });
+  const candidates = items.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((item) => ({
+    title: stripHtml(String(item.title || '')),
+    description: stripHtml(String(item.description || '')),
+    link: String(item.link || '')
+  }));
+
+  const results = [];
+  for (const item of candidates) {
+    let summary = truncateSummary(item.description) || item.title;
+    try {
+      const articleText = await fetchArticleParagraphs(item.link, GOVRU_PARAGRAPH_SKIP_RE);
+      if (articleText && articleText.length >= 200) {
+        summary = await summarizeGovArticle(env, 'the Russian government', item.title, articleText);
+      }
+    } catch (err) {
+      console.error('government.ru article summarize failed', item.link, err);
+    }
+    results.push({ title: item.title, summary, link: item.link });
+  }
+  return results;
 }
 
 async function refreshJewish(env) {
   try {
-    const items = await fetchJewishHeadlines();
+    const items = await fetchJewishHeadlines(env);
     await env.HEADLINES_KV.put(JEWISH_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
   } catch (err) {
     console.error('jewish refresh failed', err);
@@ -763,8 +934,12 @@ async function refreshJewish(env) {
 // Same per-feed try/catch loop as refreshHeadlines below, so one blocked
 // source (ToI and Chabad both sit behind Cloudflare bot checks that can
 // reject non-browser traffic) just means fewer candidates from it rather
-// than failing the whole card.
-async function fetchJewishHeadlines() {
+// than failing the whole card. Once deduped down to the final list, each
+// item's full article is fetched and run through the same Claude summary
+// (summarizeWithClaude) as the main headlines card, rather than just
+// trimming the RSS teaser — falls back to the teaser if that fails. See
+// enrichWithArticleSummaries, shared by all five religion cards.
+async function fetchJewishHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const candidates = [];
 
@@ -791,12 +966,36 @@ async function fetchJewishHeadlines() {
     }
   }
 
-  return dedupeByTitle(candidates).slice(0, JEWISH_HEADLINE_COUNT);
+  const picked = dedupeByTitle(candidates).slice(0, JEWISH_HEADLINE_COUNT);
+  return enrichWithArticleSummaries(env, picked);
+}
+
+// Shared by all five religion cards (Judaism/Catholicism/Islam/Hindu/
+// Buddhist): each already-deduped, already-sliced candidate keeps its
+// RSS-derived teaser as `summary` until its full article can be fetched and
+// run through the same Claude treatment (summarizeWithClaude) as the main
+// headlines card. A blocked fetch (paywall/bot-check) or a summarize error
+// just leaves the teaser in place rather than failing the item.
+async function enrichWithArticleSummaries(env, items) {
+  const results = [];
+  for (const item of items) {
+    let summary = item.summary;
+    try {
+      const articleText = await fetchArticleText(item.link);
+      if (articleText && articleText.length >= 200 && !BLOCK_PATTERNS.test(articleText)) {
+        summary = await summarizeWithClaude(env, item.title, articleText);
+      }
+    } catch (err) {
+      console.error('article summarize failed', item.link, err);
+    }
+    results.push({ source: item.source, title: item.title, link: item.link, summary });
+  }
+  return results;
 }
 
 async function refreshCatholic(env) {
   try {
-    const items = await fetchCatholicHeadlines();
+    const items = await fetchCatholicHeadlines(env);
     await env.HEADLINES_KV.put(CATHOLIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
   } catch (err) {
     console.error('catholic refresh failed', err);
@@ -820,7 +1019,7 @@ function catholicCandidateSummary(item, maxLen) {
   return truncateSummary(raw, maxLen);
 }
 
-async function fetchCatholicHeadlines() {
+async function fetchCatholicHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const candidates = [];
 
@@ -853,7 +1052,8 @@ async function fetchCatholicHeadlines() {
     console.error('catholic feed fetch failed', USCCB_FEED_URL, err);
   }
 
-  return dedupeByTitle(candidates).slice(0, CATHOLIC_HEADLINE_COUNT);
+  const picked = dedupeByTitle(candidates).slice(0, CATHOLIC_HEADLINE_COUNT);
+  return enrichWithArticleSummaries(env, picked);
 }
 
 // Regex-extracted rather than run through XMLParser: USCCB's feed packs
@@ -883,7 +1083,7 @@ async function fetchUsccbNews(count) {
 
 async function refreshIslamic(env) {
   try {
-    const items = await fetchIslamicHeadlines();
+    const items = await fetchIslamicHeadlines(env);
     await env.HEADLINES_KV.put(ISLAMIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
   } catch (err) {
     console.error('islamic refresh failed', err);
@@ -897,7 +1097,7 @@ function itemIsIslamRelevant(item) {
   return ISLAM_KEYWORDS.test(String(item.title || ''));
 }
 
-async function fetchIslamicHeadlines() {
+async function fetchIslamicHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const candidates = [];
 
@@ -931,7 +1131,8 @@ async function fetchIslamicHeadlines() {
     console.error('islamic feed fetch failed', MEE_FEED_URL, err);
   }
 
-  return dedupeByTitle(candidates).slice(0, ISLAMIC_HEADLINE_COUNT);
+  const picked = dedupeByTitle(candidates).slice(0, ISLAMIC_HEADLINE_COUNT);
+  return enrichWithArticleSummaries(env, picked);
 }
 
 // Regex-extracted like fetchUsccbNews above: Middle East Eye's <description>
@@ -962,14 +1163,14 @@ async function fetchMiddleEastEyeNews(count) {
 
 async function refreshHindu(env) {
   try {
-    const items = await fetchHinduHeadlines();
+    const items = await fetchHinduHeadlines(env);
     await env.HEADLINES_KV.put(HINDU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
   } catch (err) {
     console.error('hindu refresh failed', err);
   }
 }
 
-async function fetchHinduHeadlines() {
+async function fetchHinduHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const candidates = [];
 
@@ -1008,7 +1209,8 @@ async function fetchHinduHeadlines() {
     console.error('hindu feed fetch failed', HINDU_BLOG_FEED_URL, err);
   }
 
-  return dedupeByTitle(candidates).slice(0, HINDU_HEADLINE_COUNT);
+  const picked = dedupeByTitle(candidates).slice(0, HINDU_HEADLINE_COUNT);
+  return enrichWithArticleSummaries(env, picked);
 }
 
 // Regex-extracted rather than run through XMLParser: this feed doesn't cap
@@ -1074,7 +1276,7 @@ async function fetchHinduBlogPosts(count) {
 
 async function refreshBuddhist(env) {
   try {
-    const items = await fetchBuddhistHeadlines();
+    const items = await fetchBuddhistHeadlines(env);
     await env.HEADLINES_KV.put(BUDDHIST_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
   } catch (err) {
     console.error('buddhist refresh failed', err);
@@ -1097,7 +1299,7 @@ function itemIsBuddhismRelevant(item) {
   return BUDDHISM_KEYWORDS.test(String(item.title || ''));
 }
 
-async function fetchBuddhistHeadlines() {
+async function fetchBuddhistHeadlines(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const candidates = [];
 
@@ -1125,7 +1327,8 @@ async function fetchBuddhistHeadlines() {
     }
   }
 
-  return dedupeByTitle(candidates).slice(0, BUDDHIST_HEADLINE_COUNT);
+  const picked = dedupeByTitle(candidates).slice(0, BUDDHIST_HEADLINE_COUNT);
+  return enrichWithArticleSummaries(env, picked);
 }
 
 async function fetchGoodNewsHeadlines() {
@@ -1390,27 +1593,7 @@ async function summarizeWithClaude(env, title, articleText) {
     'Headline: ' + title + '\n\n' +
     'Article text:\n' + articleText;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: 200,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-
-  if (!res.ok) {
-    throw new Error('Claude API error: ' + res.status + ' ' + (await res.text()));
-  }
-  const data = await res.json();
-  const text = (data.content && data.content[0] && data.content[0].text || '').trim();
-  // Defensive cleanup in case the model still opens with a heading despite instructions.
-  return text.replace(/^#+\s*summary\s*\n+/i, '').trim() || title;
+  return (await callClaude(env, prompt, 200)) || title;
 }
 
 function stripHtml(html) {
