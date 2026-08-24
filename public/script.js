@@ -548,18 +548,80 @@
 })();
 
 (function () {
-  // Shared by all "government news" side cards (US, PRC, ...): each worker
-  // route returns { status, branches: [{ name, items: [{title,summary,link}] }] }
-  // and renders into a scrollable .gov-body the same way.
-  function renderGovCard(bodyId, route) {
-    var body = document.getElementById(bodyId);
-    var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
+  var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
 
-    function escapeHtml(str) {
-      var div = document.createElement('div');
-      div.textContent = str;
-      return div.innerHTML;
+  // Shortens text word-by-word until it fits the real available box,
+  // instead of letting overflow clip mid-sentence. Same approach as the
+  // news/jewish cards.
+  function fitText(el, fullText, container) {
+    el.textContent = fullText;
+    if (container.scrollHeight <= container.clientHeight) return;
+
+    var words = fullText.split(' ');
+    while (words.length > 4 && container.scrollHeight > container.clientHeight) {
+      words.pop();
+      el.textContent = words.join(' ') + '…';
     }
+  }
+
+  // Shared by all "government news" side cards (US, PRC, Russia): each
+  // worker route returns { status, branches: [{ name, items:
+  // [{title,summary,link}] }] }. Branches are flattened into one ordered
+  // list here (each item tagged with its branch as `source`) so the card
+  // can show a single story at a time behind a toggler, same UX as the
+  // news/jewish cards above.
+  function renderGovCard(bodyId, route, prevId, nextId, counterId) {
+    var body = document.getElementById(bodyId);
+    var prevBtn = document.getElementById(prevId);
+    var nextBtn = document.getElementById(nextId);
+    var counter = document.getElementById(counterId);
+
+    var items = [];
+    var index = 0;
+
+    function renderCurrent() {
+      var item = items[index];
+      body.innerHTML = '';
+
+      var wrap = document.createElement('div');
+      wrap.className = 'gov-item';
+
+      var source = document.createElement('p');
+      source.className = 'gov-item-source';
+      source.textContent = item.source;
+
+      var headline = document.createElement('a');
+      headline.className = 'gov-item-title';
+      headline.href = item.link;
+      headline.target = '_blank';
+      headline.rel = 'noopener';
+      headline.textContent = item.title;
+
+      var summary = document.createElement('p');
+      summary.className = 'gov-item-summary';
+
+      wrap.appendChild(source);
+      wrap.appendChild(headline);
+      wrap.appendChild(summary);
+      body.appendChild(wrap);
+
+      fitText(summary, item.summary, body);
+
+      counter.textContent = (index + 1) + ' / ' + items.length;
+      prevBtn.disabled = items.length <= 1;
+      nextBtn.disabled = items.length <= 1;
+    }
+
+    prevBtn.addEventListener('click', function () {
+      if (!items.length) return;
+      index = (index - 1 + items.length) % items.length;
+      renderCurrent();
+    });
+    nextBtn.addEventListener('click', function () {
+      if (!items.length) return;
+      index = (index + 1) % items.length;
+      renderCurrent();
+    });
 
     fetch(WORKER_URL + route)
       .then(function (res) {
@@ -570,19 +632,14 @@
         if (data.status !== 'ok' || !data.branches || !data.branches.length) {
           throw new Error('not ready yet');
         }
-        var html = data.branches.map(function (branch) {
-          var itemsHtml = branch.items.map(function (item) {
-            return '<div class="gov-item">' +
-              '<a class="gov-item-title" href="' + item.link + '" target="_blank" rel="noopener">' + escapeHtml(item.title) + '</a>' +
-              '<p class="gov-item-summary">' + escapeHtml(item.summary) + '</p>' +
-              '</div>';
-          }).join('');
-          return '<div class="gov-section">' +
-            '<p class="gov-section-title">' + escapeHtml(branch.name) + '</p>' +
-            itemsHtml +
-            '</div>';
-        }).join('');
-        body.innerHTML = html;
+        items = [];
+        data.branches.forEach(function (branch) {
+          branch.items.forEach(function (item) {
+            items.push({ source: branch.name, title: item.title, summary: item.summary, link: item.link });
+          });
+        });
+        index = 0;
+        renderCurrent();
       })
       .catch(function () {
         body.innerHTML = '<p class="gov-error">Government updates unavailable right now — check back later.</p>';
@@ -591,13 +648,13 @@
 
   // White House / Congress / Supreme Court, refreshed on the same daily
   // 7am ET cycle as the rest of the dashboard.
-  renderGovCard('govUsBody', '/gov/us');
+  renderGovCard('govUsBody', '/gov/us', 'govUsPrev', 'govUsNext', 'govUsCounter');
 
   // Xinhua / The State Council, same daily refresh cycle.
-  renderGovCard('govCnBody', '/gov/cn');
+  renderGovCard('govCnBody', '/gov/cn', 'govCnPrev', 'govCnNext', 'govCnCounter');
 
   // The Kremlin / Government of Russia, same daily refresh cycle.
-  renderGovCard('govRuBody', '/gov/ru');
+  renderGovCard('govRuBody', '/gov/ru', 'govRuPrev', 'govRuNext', 'govRuCounter');
 })();
 
 (function () {

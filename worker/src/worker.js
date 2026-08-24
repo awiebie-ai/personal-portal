@@ -144,7 +144,10 @@ const GOODNEWS_FEEDS = [
 // Claude summarization here, just cleaned-up excerpts, to keep this card
 // cheap and simple per the original spec.
 const GOV_BRANCH_ITEM_COUNT = 3;
-const GOV_SUMMARY_MAX = 220;
+// Cards show one story at a time (see gov-body in script.js) rather than a
+// scrollable list, so there's much more room per item than the old 220-char
+// cap assumed.
+const GOV_SUMMARY_MAX = 500;
 const WHITEHOUSE_FEED_URL = 'https://www.whitehouse.gov/news/feed/';
 const CONGRESS_RECORD_FEED_URL = 'https://www.govinfo.gov/rss/crec.xml';
 // Term index in this URL is fixed by SCOTUS (25 = October Term 2025); bump
@@ -701,29 +704,28 @@ async function refreshGovRu(env) {
   }
 }
 
-// Atom feed, not RSS — entries live at feed.entry, and each <summary> comes
-// back as an object ({ '#text', '@_type' }) rather than a plain string
-// because it carries a type="html" attribute alongside its text.
+// Atom feed, not RSS — entries live at feed.entry. <summary> is just a lead
+// image's alt caption with no real text; the actual article body lives in
+// <content> instead, entity-escaped (&lt;p&gt;...). Extracted with a regex
+// per entry rather than the shared XMLParser: parsing <content> for all 20
+// entries in one pass blows fast-xml-parser's entity-expansion guard, same
+// issue as the Congressional Record feed above.
 async function fetchKremlinNews() {
-  const parser = new XMLParser({ ignoreAttributes: false });
   const res = await fetch(KREMLIN_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  // <content> is the full article HTML (unused below) and packs enough
-  // entities across 20 entries to blow fast-xml-parser's entity-expansion
-  // guard, same issue as the Congressional Record feed above.
-  const xml = (await res.text()).replace(/<content[^>]*>[\s\S]*?<\/content>/g, '');
-  const data = parser.parse(xml);
-  const rawEntries = data?.feed?.entry || [];
-  const entries = Array.isArray(rawEntries) ? rawEntries : [rawEntries];
+  const xml = await res.text();
+  const entryBlocks = xml.match(/<entry>[\s\S]*?<\/entry>/g) || [];
 
-  return entries.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((entry) => {
-    const linkEl = Array.isArray(entry.link) ? entry.link[0] : entry.link;
-    const link = (linkEl && linkEl['@_href']) || String(entry.id || '');
-    const rawSummary = entry.summary && typeof entry.summary === 'object' ? entry.summary['#text'] : entry.summary;
-    const title = stripHtml(String(entry.title || ''));
+  return entryBlocks.slice(0, GOV_RU_SOURCE_ITEM_COUNT).map((block) => {
+    const titleRaw = (/<title>([\s\S]*?)<\/title>/.exec(block) || [, ''])[1];
+    const linkRaw = (/<link href="([^"]+)"/.exec(block) || [, ''])[1];
+    const contentRaw = (/<content[^>]*>([\s\S]*?)<\/content>/.exec(block) || [, ''])[1];
+    const idRaw = (/<id>([\s\S]*?)<\/id>/.exec(block) || [, ''])[1];
+    const title = stripHtml(decodeEntities(titleRaw));
+    const content = stripHtml(decodeEntities(contentRaw)).replace(/\s+/g, ' ').trim();
     return {
       title,
-      summary: truncateSummary(stripHtml(String(rawSummary || ''))) || title,
-      link
+      summary: truncateSummary(content) || title,
+      link: linkRaw || idRaw
     };
   });
 }
