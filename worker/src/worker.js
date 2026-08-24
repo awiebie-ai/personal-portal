@@ -29,7 +29,10 @@ const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 // non-browser traffic, so each feed is fetched independently and a failure
 // there just means fewer candidates from that source, not a blank card.
 const JEWISH_HEADLINE_COUNT = 7;
-const JEWISH_SUMMARY_MAX = 170;
+// Card shows one item at a time and trims to fit via fitText() in
+// script.js, so this just needs to be generous enough that the real
+// constraint is always the rendered box, not this cap.
+const JEWISH_SUMMARY_MAX = 500;
 const JEWISH_FEEDS = [
   { name: 'JTA', url: 'https://www.jta.org/feed', count: 3 },
   { name: 'The Times of Israel', url: 'https://www.timesofisrael.com/feed/', count: 2 },
@@ -47,7 +50,7 @@ const JEWISH_FEEDS = [
 // descriptions across ~50 items trip fast-xml-parser's entity-expansion
 // guard the same way the Congressional Record feed's did.
 const CATHOLIC_HEADLINE_COUNT = 7;
-const CATHOLIC_SUMMARY_MAX = 170;
+const CATHOLIC_SUMMARY_MAX = 500;
 const CATHOLIC_FEEDS = [
   { name: 'Vatican News', url: 'https://www.vaticannews.va/en.rss.xml', count: 3 },
   { name: 'Catholic News Agency', url: 'https://www.catholicnewsagency.com/rss/news.xml', count: 3 },
@@ -68,7 +71,7 @@ const USCCB_ITEM_COUNT = 1;
 // entity-expansion guard (same issue as USCCB above), so it's fetched with
 // its own regex extractor instead of the shared XMLParser.
 const ISLAMIC_HEADLINE_COUNT = 7;
-const ISLAMIC_SUMMARY_MAX = 170;
+const ISLAMIC_SUMMARY_MAX = 500;
 const ISLAM_KEYWORDS = /islam|muslim/i;
 const ISLAMIC_FEEDS = [
   { name: 'Al Jazeera English', url: 'https://www.aljazeera.com/xml/rss/all.xml', count: 3 },
@@ -92,7 +95,7 @@ const MEE_ITEM_COUNT = 3;
 // redirect to get there. (Patheos' Hindu channel was dropped — its feed's
 // most recent post was from 2021, too dormant to be useful here.)
 const HINDU_HEADLINE_COUNT = 7;
-const HINDU_SUMMARY_MAX = 170;
+const HINDU_SUMMARY_MAX = 500;
 const HINDU_FEEDS = [
   { name: 'Hindu Press International', url: 'https://www.hinduismtoday.com/hpi/feed/', count: 3 },
   { name: 'Hindu American Foundation', url: 'https://www.hinduamerican.org/feed/', count: 2 }
@@ -115,7 +118,7 @@ const HINDU_BLOG_ITEM_COUNT = 2;
 // pool anyway since a feed with nothing to give just contributes nothing,
 // costing this card little if it stays empty and nothing if it recovers.
 const BUDDHIST_HEADLINE_COUNT = 7;
-const BUDDHIST_SUMMARY_MAX = 170;
+const BUDDHIST_SUMMARY_MAX = 500;
 const BUDDHISM_KEYWORDS = /buddh/i;
 const BUDDHIST_FEEDS = [
   { name: 'Lion’s Roar', url: 'https://www.lionsroar.com/feed/', count: 3 },
@@ -803,9 +806,13 @@ async function refreshCatholic(env) {
 // National Catholic Register's <description> is a placeholder ("news");
 // the real excerpt lives in <content:encoded>, with a lead <figure> (image
 // + caption + photo credit) that would otherwise get jumbled in with the
-// actual article text once tags are stripped.
+// actual article text once tags are stripped. Vatican News appends a
+// "Read all" link paragraph after the real excerpt — invisible at the old
+// 170-char cap but now often within reach, so it's stripped before tags
+// come off (once stripped, "Read all" is indistinguishable plain text).
 function catholicCandidateSummary(item, maxLen) {
-  let raw = stripHtml(String(item.description || ''));
+  const description = String(item.description || '').replace(/<p>\s*<a[^>]*>Read all<\/a>\s*<\/p>/gi, '');
+  let raw = stripHtml(description);
   if (raw.length < 30) {
     const encoded = String(item['content:encoded'] || '').replace(/<figure[\s\S]*?<\/figure>/gi, '');
     raw = stripHtml(encoded);
