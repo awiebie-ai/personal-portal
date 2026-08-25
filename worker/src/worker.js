@@ -501,11 +501,15 @@ async function fetchWeatherCities() {
 
 async function refreshGovUs(env) {
   try {
-    const [whiteHouse, congress, scotus] = await Promise.all([
+    // Congress and SCOTUS both parse PDFs via unpdf's getDocumentProxy, which
+    // lazily resolves its pdf.js bundle on first use per isolate. Kept
+    // sequential as a precaution against racing that one-time resolution;
+    // White House doesn't touch PDFs, so it stays parallel with Congress.
+    const [whiteHouse, congress] = await Promise.all([
       fetchWhiteHouseReleases(env),
-      fetchCongressRecord(env),
-      fetchScotusOpinions(env)
+      fetchCongressRecord(env)
     ]);
+    const scotus = await fetchScotusOpinions(env);
     const branches = [
       { name: 'White House', items: whiteHouse },
       { name: 'Congress', items: congress },
@@ -783,7 +787,10 @@ async function fetchScotusOpinions(env) {
 async function fetchPdfText(url) {
   if (!url) return '';
   const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!res.ok) return '';
+  if (!res.ok) {
+    console.error('fetchPdfText failed', res.status, url);
+    return '';
+  }
   const buffer = await res.arrayBuffer();
   const pdf = await getDocumentProxy(new Uint8Array(buffer));
   const { text } = await extractText(pdf, { mergePages: true });
