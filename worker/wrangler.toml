@@ -14,3 +14,12 @@ crons = ["0 11 * * *", "0 12 * * *", "0 23 * * *", "0 0 * * *"]
 [[kv_namespaces]]
 binding = "HEADLINES_KV"
 id = "8068760f7a654443a15a12c51dee91dd"
+
+# refreshAll() does real CPU-bound work per invocation — PDF text extraction
+# (unpdf/pdf.js) for SCOTUS opinions (up to 77 pages) and Congressional
+# Daily Digests, on top of parsing ~20 XML/HTML feeds. The Free plan's fixed
+# 10ms cron CPU budget silently killed the isolate mid-refresh before this
+# could finish, leaving whichever cards hadn't written yet on stale data.
+# Paid plan's default is 30s; set explicitly here with headroom to spare.
+[limits]
+cpu_ms = 120000

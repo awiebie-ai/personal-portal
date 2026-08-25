@@ -144,11 +144,11 @@ const GOODNEWS_FEEDS = [
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
-// branches. White House and Supreme Court items get a full-text Claude
-// summary (see summarizeGovRelease/summarizeScotusOpinion) since their raw
-// source text — a one-line RSS teaser, or a docket "title" attribute — is
-// too thin to fill the card. Congress stays on a fixed boilerplate line;
-// there's no per-issue text worth summarizing (see fetchCongressRecord).
+// branches, all three now full-text Claude summaries (see
+// summarizeGovRelease/summarizeScotusOpinion/summarizeCongressionalDigest)
+// since the raw source text for each — a one-line RSS teaser, a docket
+// "title" attribute, a list of PDF download links — is too thin on its own
+// to fill the card.
 const GOV_BRANCH_ITEM_COUNT = 3;
 // Cards show one story at a time (see gov-body in script.js) rather than a
 // scrollable list, so there's much more room per item than the old 220-char
@@ -156,6 +156,15 @@ const GOV_BRANCH_ITEM_COUNT = 3;
 const GOV_SUMMARY_MAX = 500;
 const WHITEHOUSE_FEED_URL = 'https://www.whitehouse.gov/news/feed/';
 const CONGRESS_RECORD_FEED_URL = 'https://www.govinfo.gov/rss/crec.xml';
+// GovInfo's own API (distinct from the RSS feed above), used to pull each
+// issue's Daily Digest PDF — the Record's own concise, official rundown of
+// that day's House/Senate floor action, bills, and votes; 3-4 pages versus
+// the full issue's PDF which can run past 100. DEMO_KEY works out of the
+// box (api.data.gov's shared demo key) but is rate-limited; set
+// GOVINFO_API_KEY (free, instant signup at https://api.data.gov/signup/,
+// `wrangler secret put GOVINFO_API_KEY`) for a dedicated, much higher quota.
+const GOVINFO_DAILY_DIGEST_URL = (packageId, apiKey) =>
+  'https://api.govinfo.gov/packages/' + packageId + '/pdf/dailydigest?api_key=' + apiKey;
 // Term index in this URL is fixed by SCOTUS (25 = October Term 2025); bump
 // to 26 once October Term 2026 opinions start posting.
 const SCOTUS_OPINIONS_URL = 'https://www.supremecourt.gov/opinions/slipopinion/25';
@@ -494,7 +503,7 @@ async function refreshGovUs(env) {
   try {
     const [whiteHouse, congress, scotus] = await Promise.all([
       fetchWhiteHouseReleases(env),
-      fetchCongressRecord(),
+      fetchCongressRecord(env),
       fetchScotusOpinions(env)
     ]);
     const branches = [
@@ -513,7 +522,17 @@ function truncateSummary(text, maxLen) {
   // WordPress-fed sources (e.g. JTA) prefix "The post ... appeared first on
   // ..." with a bare "--" separator line, which the first replace alone
   // leaves dangling.
-  const clean = text.replace(/\s*The post.*$/is, '').replace(/\s*--\s*$/, '').trim();
+  let clean = text.replace(/\s*The post.*$/is, '').replace(/\s*--\s*$/, '').trim();
+
+  // This is also the fallback path when full-article Claude summarization
+  // fails (see callClaude), so `text` here is often just the raw RSS
+  // <description> — and WordPress's own auto-excerpt already ends with a
+  // literal "[…]" when IT cut the article off mid-sentence server-side.
+  // Shown raw, that reads as a broken/cut-off card, so it's swapped for the
+  // same plain "…" the length-based truncation below already uses — no
+  // sentence-boundary guessing (which trips on abbreviations like "U.S.").
+  clean = clean.replace(/\s*\[…\]\s*$/, '…');
+
   if (clean.length <= limit) return clean;
   return clean.slice(0, limit).replace(/\s+\S*$/, '') + '…';
 }
@@ -582,36 +601,71 @@ async function summarizeScotusOpinion(env, caseTitle, opinionText) {
   return (await callClaude(env, prompt, 400)) || caseTitle;
 }
 
-// Shared by summarizeWithClaude/summarizeGovRelease/summarizeScotusOpinion —
+// Shared by every summarizeXxx function across the gov and religion cards —
 // just the API call and response-text extraction; each caller supplies its
 // own prompt and fallback.
-async function callClaude(env, prompt, maxTokens) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': env.ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01'
-    },
-    body: JSON.stringify({
-      model: CLAUDE_MODEL,
-      max_tokens: maxTokens,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
+//
+// A single refresh now fires this well over 60 times (every gov branch item
+// plus every religion card's headlines), mostly within the same few seconds
+// since the cards refresh in parallel. That's enough concurrent load to
+// occasionally trip rate limiting or a transient 5xx, and previously any
+// such failure silently fell back to the raw, often mid-sentence-truncated
+// RSS teaser — which is what was showing up as "cut off" summaries on the
+// cards. Retrying transient failures with backoff means most of those now
+// just succeed on the 2nd or 3rd attempt instead of falling back at all.
+const CLAUDE_MAX_ATTEMPTS = 3;
+const CLAUDE_RETRY_STATUSES = new Set([429, 500, 502, 503, 529]);
 
-  if (!res.ok) {
-    throw new Error('Claude API error: ' + res.status + ' ' + (await res.text()));
+async function callClaude(env, prompt, maxTokens) {
+  let lastErr;
+  for (let attempt = 1; attempt <= CLAUDE_MAX_ATTEMPTS; attempt++) {
+    let res;
+    try {
+      res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: CLAUDE_MODEL,
+          max_tokens: maxTokens,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+    } catch (err) {
+      // Network-level failure (fetch itself threw) — always worth a retry.
+      lastErr = err;
+      if (attempt === CLAUDE_MAX_ATTEMPTS) throw lastErr;
+      await new Promise((resolve) => setTimeout(resolve, 600 * attempt));
+      continue;
+    }
+
+    if (res.ok) {
+      const data = await res.json();
+      const text = (data.content && data.content[0] && data.content[0].text || '').trim();
+      // Defensive cleanup in case the model still opens with a heading despite instructions.
+      return text.replace(/^#+\s*summary\s*\n+/i, '').trim();
+    }
+
+    const body = await res.text();
+    lastErr = new Error('Claude API error: ' + res.status + ' ' + body);
+    // Non-retryable status (bad request, auth, etc.) — a retry won't help.
+    if (!CLAUDE_RETRY_STATUSES.has(res.status) || attempt === CLAUDE_MAX_ATTEMPTS) {
+      throw lastErr;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 600 * attempt));
   }
-  const data = await res.json();
-  const text = (data.content && data.content[0] && data.content[0].text || '').trim();
-  // Defensive cleanup in case the model still opens with a heading despite instructions.
-  return text.replace(/^#+\s*summary\s*\n+/i, '').trim();
+  throw lastErr;
 }
 
-// govinfo's "new items" feed isn't ordered by the Record's own date, so it's
-// re-sorted by pubDate here to actually surface the most recent editions.
-async function fetchCongressRecord() {
+// govinfo's "new items" feed isn't ordered by the Record's own date — its
+// pubDate reflects when govinfo indexed/backfilled the item, not the
+// session date, and can be months off — so items are instead sorted by the
+// actual issue date embedded in each entry's own URL (CREC-YYYY-MM-DD) to
+// get the three most recent releases as of the pull.
+async function fetchCongressRecord(env) {
   const parser = new XMLParser({ ignoreAttributes: false });
   const res = await fetch(CONGRESS_RECORD_FEED_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
   // <description> in this feed is just a list of PDF/metadata download
@@ -623,22 +677,64 @@ async function fetchCongressRecord() {
   const rawItems = data?.rss?.channel?.item || [];
   const items = Array.isArray(rawItems) ? rawItems : [rawItems];
 
-  const sorted = items
-    .map((item) => ({
-      title: stripHtml(String(item.title || '')),
-      link: String(item.link || ''),
-      pubDate: new Date(item.pubDate || 0)
-    }))
-    .sort((a, b) => b.pubDate - a.pubDate);
+  const candidates = items
+    .map((item) => {
+      const link = String(item.link || '');
+      const dateMatch = /CREC-(\d{4}-\d{2}-\d{2})/.exec(link);
+      if (!dateMatch) return null;
+      return {
+        title: stripHtml(String(item.title || '')),
+        link,
+        date: dateMatch[1],
+        packageId: 'CREC-' + dateMatch[1]
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.date.localeCompare(a.date));
 
-  return sorted.slice(0, GOV_BRANCH_ITEM_COUNT).map((item) => {
+  const picked = candidates.slice(0, GOV_BRANCH_ITEM_COUNT);
+  const apiKey = env.GOVINFO_API_KEY || 'DEMO_KEY';
+
+  const results = [];
+  for (const item of picked) {
     const dateMatch = /\(([^)]+)\)\s*$/.exec(item.title);
-    return {
-      title: 'Congressional Record — ' + (dateMatch ? dateMatch[1] : item.title),
-      summary: 'Official daily record of proceedings and debate in the U.S. House and Senate.',
-      link: item.link
-    };
-  });
+    const displayTitle = 'Congressional Record — ' + (dateMatch ? dateMatch[1] : item.title);
+    let summary = CONGRESS_RECORD_FALLBACK_SUMMARY;
+    try {
+      const digestText = await fetchPdfText(GOVINFO_DAILY_DIGEST_URL(item.packageId, apiKey));
+      if (digestText && digestText.length >= 200) {
+        summary = await summarizeCongressionalDigest(env, displayTitle, digestText);
+      }
+    } catch (err) {
+      console.error('congress digest summarize failed', item.packageId, err);
+    }
+    results.push({ title: displayTitle, summary, link: item.link });
+  }
+  return results;
+}
+
+// A pro forma session (chamber gavels in/out with no real business — common
+// on Fridays/holiday weeks) can lack a Daily Digest granule entirely, which
+// is the one case this legitimately falls back rather than retrying.
+const CONGRESS_RECORD_FALLBACK_SUMMARY = 'Official daily record of proceedings and debate in the U.S. House and Senate.';
+
+// Same longer-form treatment as summarizeGovRelease/summarizeScotusOpinion,
+// tuned for the Daily Digest's own structure (Senate/House chamber action,
+// bills introduced, votes, committee activity) rather than a press release
+// or legal opinion.
+async function summarizeCongressionalDigest(env, title, digestText) {
+  const prompt =
+    "Summarize this Congressional Daily Digest — the official record of " +
+    "that day's House and Senate floor proceedings — in 4-6 sentences. " +
+    'Cover the key bills or resolutions introduced, considered, or passed, ' +
+    'notable votes, committee actions, and any other significant proceedings, ' +
+    'so someone who has not read the original comes away well informed. ' +
+    'Be neutral and factual. ' +
+    'Respond with plain prose only: no markdown, no headers, no bullet points, no preamble.\n\n' +
+    'Issue: ' + title + '\n\n' +
+    'Daily Digest text:\n' + digestText;
+
+  return (await callClaude(env, prompt, 400)) || title;
 }
 
 // supremecourt.gov has no working RSS feed for opinions, so this scrapes the
