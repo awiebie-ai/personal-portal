@@ -128,19 +128,14 @@ const BUDDHIST_FEEDS = [
   { name: 'Buddhistdoor Global', url: 'https://www.buddhistdoor.net/feed/', count: 2 }
 ];
 
-// Center-column "Good News" cover-flow card: pooled highlights across five
+// Center-column "Good News" cover-flow card: pooled highlights across two
 // solutions-journalism/feel-good outlets, same pooling pattern as the
-// religion cards above. Sunny Skyz's <description> is just a lead image
-// with no text and no richer field to fall back to (unlike Catholic's
-// content:encoded), so it relies on the shared `|| title` fallback below.
-const GOODNEWS_HEADLINE_COUNT = 8;
+// religion cards above.
+const GOODNEWS_HEADLINE_COUNT = 7;
 const GOODNEWS_SUMMARY_MAX = 400;
 const GOODNEWS_FEEDS = [
-  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 3 },
-  { name: 'Positive News', url: 'https://www.positive.news/feed/', count: 2 },
-  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 2 },
-  { name: 'Upworthy', url: 'https://www.upworthy.com/feed/', count: 2 },
-  { name: 'Sunny Skyz', url: 'https://www.sunnyskyz.com/rss_tebow.php', count: 2 }
+  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 4 },
+  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 3 }
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three

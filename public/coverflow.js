@@ -1,7 +1,7 @@
 (function () {
   // Center "Good News" cover-flow card. Same Cloudflare Worker as the other
-  // cards, /good-news route (Good News Network, Positive News, Reasons to Be
-  // Cheerful, Upworthy, Sunny Skyz pooled together).
+  // cards, /good-news route (Good News Network, Reasons to Be Cheerful
+  // pooled together).
   var WORKER_URL = 'https://portfolio-headlines.mfzequeira.workers.dev';
   var goodNewsItems = [];
   var statusMessage = 'Loading good news…';
