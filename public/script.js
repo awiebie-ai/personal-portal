@@ -1,3 +1,24 @@
+// Formats an ISO timestamp into the "DD.MM.YY 7AM"/"7PM" stamp shown next to
+// each source label on the left/right cards. Primarily fed each article's
+// `firstSeenAt` (the 7AM/7PM ET refresh when it first landed on the site, so
+// a carried-over article's stamp stays frozen until a new article replaces
+// it), falling back to the card-level `updatedAt`. Derived in
+// America/New_York so it matches the refresh schedule regardless of the
+// viewer's own timezone.
+function formatSourceStamp(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  var parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York',
+    day: '2-digit', month: '2-digit', year: '2-digit',
+    hour: 'numeric', hour12: true
+  }).formatToParts(d);
+  var map = {};
+  parts.forEach(function (p) { map[p.type] = p.value; });
+  return map.day + '.' + map.month + '.' + map.year + ' ' + map.hour + (map.dayPeriod || '');
+}
+
 (function () {
   var heroBg = document.getElementById('heroBg');
   var caption = document.getElementById('heroCaption');
@@ -578,6 +599,7 @@
 
     var items = [];
     var index = 0;
+    var stamp = '';
 
     function renderCurrent() {
       var item = items[index];
@@ -589,6 +611,13 @@
       var source = document.createElement('p');
       source.className = 'gov-item-source';
       source.textContent = item.source;
+      var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+      if (stampText) {
+        var stampEl = document.createElement('span');
+        stampEl.className = 'source-stamp';
+        stampEl.textContent = stampText;
+        source.appendChild(stampEl);
+      }
 
       var headline = document.createElement('a');
       headline.className = 'gov-item-title';
@@ -632,10 +661,11 @@
         if (data.status !== 'ok' || !data.branches || !data.branches.length) {
           throw new Error('not ready yet');
         }
+        stamp = formatSourceStamp(data.updatedAt);
         items = [];
         data.branches.forEach(function (branch) {
           branch.items.forEach(function (item) {
-            items.push({ source: branch.name, title: item.title, summary: item.summary, link: item.link });
+            items.push({ source: branch.name, title: item.title, summary: item.summary, link: item.link, firstSeenAt: item.firstSeenAt });
           });
         });
         index = 0;
@@ -670,6 +700,7 @@
 
   var items = [];
   var index = 0;
+  var stamp = '';
 
   function fitText(el, fullText, container) {
     el.textContent = fullText;
@@ -692,6 +723,13 @@
     var source = document.createElement('p');
     source.className = 'jewish-source';
     source.textContent = item.source;
+    var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+    if (stampText) {
+      var stampEl = document.createElement('span');
+      stampEl.className = 'source-stamp';
+      stampEl.textContent = stampText;
+      source.appendChild(stampEl);
+    }
 
     var headline = document.createElement('a');
     headline.className = 'jewish-headline';
@@ -735,6 +773,7 @@
       if (data.status !== 'ok' || !data.items || !data.items.length) {
         throw new Error('not ready yet');
       }
+      stamp = formatSourceStamp(data.updatedAt);
       items = data.items;
       index = 0;
       renderCurrent();
@@ -756,6 +795,7 @@
 
   var items = [];
   var index = 0;
+  var stamp = '';
 
   function fitText(el, fullText, container) {
     el.textContent = fullText;
@@ -778,6 +818,13 @@
     var source = document.createElement('p');
     source.className = 'catholic-source';
     source.textContent = item.source;
+    var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+    if (stampText) {
+      var stampEl = document.createElement('span');
+      stampEl.className = 'source-stamp';
+      stampEl.textContent = stampText;
+      source.appendChild(stampEl);
+    }
 
     var headline = document.createElement('a');
     headline.className = 'catholic-headline';
@@ -821,6 +868,7 @@
       if (data.status !== 'ok' || !data.items || !data.items.length) {
         throw new Error('not ready yet');
       }
+      stamp = formatSourceStamp(data.updatedAt);
       items = data.items;
       index = 0;
       renderCurrent();
@@ -843,6 +891,7 @@
 
   var items = [];
   var index = 0;
+  var stamp = '';
 
   function fitText(el, fullText, container) {
     el.textContent = fullText;
@@ -865,6 +914,13 @@
     var source = document.createElement('p');
     source.className = 'islamic-source';
     source.textContent = item.source;
+    var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+    if (stampText) {
+      var stampEl = document.createElement('span');
+      stampEl.className = 'source-stamp';
+      stampEl.textContent = stampText;
+      source.appendChild(stampEl);
+    }
 
     var headline = document.createElement('a');
     headline.className = 'islamic-headline';
@@ -908,6 +964,7 @@
       if (data.status !== 'ok' || !data.items || !data.items.length) {
         throw new Error('not ready yet');
       }
+      stamp = formatSourceStamp(data.updatedAt);
       items = data.items;
       index = 0;
       renderCurrent();
@@ -930,6 +987,7 @@
 
   var items = [];
   var index = 0;
+  var stamp = '';
 
   function fitText(el, fullText, container) {
     el.textContent = fullText;
@@ -952,6 +1010,13 @@
     var source = document.createElement('p');
     source.className = 'hindu-source';
     source.textContent = item.source;
+    var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+    if (stampText) {
+      var stampEl = document.createElement('span');
+      stampEl.className = 'source-stamp';
+      stampEl.textContent = stampText;
+      source.appendChild(stampEl);
+    }
 
     var headline = document.createElement('a');
     headline.className = 'hindu-headline';
@@ -995,6 +1060,7 @@
       if (data.status !== 'ok' || !data.items || !data.items.length) {
         throw new Error('not ready yet');
       }
+      stamp = formatSourceStamp(data.updatedAt);
       items = data.items;
       index = 0;
       renderCurrent();
@@ -1016,6 +1082,7 @@
 
   var items = [];
   var index = 0;
+  var stamp = '';
 
   function fitText(el, fullText, container) {
     el.textContent = fullText;
@@ -1038,6 +1105,13 @@
     var source = document.createElement('p');
     source.className = 'buddhist-source';
     source.textContent = item.source;
+    var stampText = formatSourceStamp(item.firstSeenAt) || stamp;
+    if (stampText) {
+      var stampEl = document.createElement('span');
+      stampEl.className = 'source-stamp';
+      stampEl.textContent = stampText;
+      source.appendChild(stampEl);
+    }
 
     var headline = document.createElement('a');
     headline.className = 'buddhist-headline';
@@ -1081,6 +1155,7 @@
       if (data.status !== 'ok' || !data.items || !data.items.length) {
         throw new Error('not ready yet');
       }
+      stamp = formatSourceStamp(data.updatedAt);
       items = data.items;
       index = 0;
       renderCurrent();

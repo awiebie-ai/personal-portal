@@ -213,6 +213,17 @@ body {
   color: var(--muted);
   margin: 0 0 4px;
 }
+/* Date/time stamp shown inline right after each card's source label
+   (e.g. "WHITE HOUSE · 28.08.26 7AM"). Inherits the source's size, color,
+   and uppercasing; toned down so the source name still leads. */
+.source-stamp {
+  margin-left: 6px;
+  font-weight: 600;
+  opacity: 0.65;
+}
+.source-stamp::before {
+  content: '· ';
+}
 .gov-item-title {
   display: block;
   font-size: 13px;

@@ -510,7 +510,11 @@ async function refreshGovUs(env) {
       { name: 'Congress', items: congress },
       { name: 'Supreme Court', items: scotus }
     ];
-    await env.HEADLINES_KV.put(GOV_US_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(GOV_US_KV_KEY, 'json');
+    const prevItems = prev && prev.branches ? prev.branches.flatMap((b) => b.items || []) : [];
+    branches.forEach((b) => assignFirstSeen(prevItems, b.items, now));
+    await env.HEADLINES_KV.put(GOV_US_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, branches }));
   } catch (err) {
     console.error('gov-us refresh failed', err);
   }
@@ -802,7 +806,11 @@ async function refreshGovCn(env) {
       { name: 'Xinhua', items: xinhua },
       { name: 'The State Council', items: stateCouncil }
     ];
-    await env.HEADLINES_KV.put(GOV_CN_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(GOV_CN_KV_KEY, 'json');
+    const prevItems = prev && prev.branches ? prev.branches.flatMap((b) => b.items || []) : [];
+    branches.forEach((b) => assignFirstSeen(prevItems, b.items, now));
+    await env.HEADLINES_KV.put(GOV_CN_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, branches }));
   } catch (err) {
     console.error('gov-cn refresh failed', err);
   }
@@ -941,7 +949,11 @@ async function refreshGovRu(env) {
       { name: 'The Kremlin', items: kremlin },
       { name: 'Government of Russia', items: governmentRu }
     ];
-    await env.HEADLINES_KV.put(GOV_RU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), branches }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(GOV_RU_KV_KEY, 'json');
+    const prevItems = prev && prev.branches ? prev.branches.flatMap((b) => b.items || []) : [];
+    branches.forEach((b) => assignFirstSeen(prevItems, b.items, now));
+    await env.HEADLINES_KV.put(GOV_RU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, branches }));
   } catch (err) {
     console.error('gov-ru refresh failed', err);
   }
@@ -1023,7 +1035,10 @@ async function fetchGovernmentRuNews(env) {
 async function refreshJewish(env) {
   try {
     const items = await fetchJewishHeadlines(env);
-    await env.HEADLINES_KV.put(JEWISH_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(JEWISH_KV_KEY, 'json');
+    assignFirstSeen(prev && prev.items, items, now);
+    await env.HEADLINES_KV.put(JEWISH_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('jewish refresh failed', err);
   }
@@ -1094,7 +1109,10 @@ async function enrichWithArticleSummaries(env, items) {
 async function refreshCatholic(env) {
   try {
     const items = await fetchCatholicHeadlines(env);
-    await env.HEADLINES_KV.put(CATHOLIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(CATHOLIC_KV_KEY, 'json');
+    assignFirstSeen(prev && prev.items, items, now);
+    await env.HEADLINES_KV.put(CATHOLIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('catholic refresh failed', err);
   }
@@ -1182,7 +1200,10 @@ async function fetchUsccbNews(count) {
 async function refreshIslamic(env) {
   try {
     const items = await fetchIslamicHeadlines(env);
-    await env.HEADLINES_KV.put(ISLAMIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(ISLAMIC_KV_KEY, 'json');
+    assignFirstSeen(prev && prev.items, items, now);
+    await env.HEADLINES_KV.put(ISLAMIC_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('islamic refresh failed', err);
   }
@@ -1262,7 +1283,10 @@ async function fetchMiddleEastEyeNews(count) {
 async function refreshHindu(env) {
   try {
     const items = await fetchHinduHeadlines(env);
-    await env.HEADLINES_KV.put(HINDU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(HINDU_KV_KEY, 'json');
+    assignFirstSeen(prev && prev.items, items, now);
+    await env.HEADLINES_KV.put(HINDU_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('hindu refresh failed', err);
   }
@@ -1375,7 +1399,10 @@ async function fetchHinduBlogPosts(count) {
 async function refreshBuddhist(env) {
   try {
     const items = await fetchBuddhistHeadlines(env);
-    await env.HEADLINES_KV.put(BUDDHIST_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(BUDDHIST_KV_KEY, 'json');
+    assignFirstSeen(prev && prev.items, items, now);
+    await env.HEADLINES_KV.put(BUDDHIST_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('buddhist refresh failed', err);
   }
@@ -1696,6 +1723,26 @@ async function summarizeWithClaude(env, title, articleText) {
 
 function stripHtml(html) {
   return decodeEntities(html.replace(/<[^>]*>/g, '')).trim();
+}
+
+// Stamps each article with a stable `firstSeenAt`: the timestamp of the
+// refresh when that article first appeared on the site. Articles carried
+// over from the previous cache keep their original firstSeenAt; only a
+// genuinely new article (a link not present last time) gets the current
+// refresh's timestamp. This is deliberately NOT the source's own publish
+// date — it answers "have I seen this on the site before?" so a persisted
+// article's stamp stays frozen until a different article takes its slot.
+// Keyed by link, which is stable per article across refreshes. Mutates and
+// returns newItems for convenience.
+function assignFirstSeen(prevItems, newItems, now) {
+  const prevSeen = new Map();
+  (prevItems || []).forEach((it) => {
+    if (it && it.link && it.firstSeenAt) prevSeen.set(it.link, it.firstSeenAt);
+  });
+  newItems.forEach((it) => {
+    it.firstSeenAt = (it.link && prevSeen.get(it.link)) || now;
+  });
+  return newItems;
 }
 
 // Some feeds (e.g. CBS) HTML-escape text inside CDATA blocks, which XML
