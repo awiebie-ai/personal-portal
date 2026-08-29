@@ -133,9 +133,13 @@ const BUDDHIST_FEEDS = [
 // religion cards above.
 const GOODNEWS_HEADLINE_COUNT = 7;
 const GOODNEWS_SUMMARY_MAX = 400;
+// Counts are pulled deliberately wider than GOODNEWS_HEADLINE_COUNT so the
+// refresh has a surplus pool to draw from when it drops articles that
+// already appeared last refresh (see selectFreshItems) — without a surplus
+// there'd be nothing fresh to backfill with.
 const GOODNEWS_FEEDS = [
-  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 4 },
-  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 3 }
+  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 8 },
+  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 6 }
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
@@ -1408,13 +1412,37 @@ async function refreshBuddhist(env) {
   }
 }
 
+// The good-news cover-flow card never renders a stamp (unlike the gov and
+// religion cards), so firstSeenAt is tracked purely in the background here —
+// used only to detect and rotate out articles that already appeared last
+// refresh, keeping the carousel feeling fresh each cycle.
 async function refreshGoodNews(env) {
   try {
-    const items = await fetchGoodNewsHeadlines();
-    await env.HEADLINES_KV.put(GOODNEWS_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: new Date().toISOString(), items }));
+    const pool = await fetchGoodNewsHeadlines();
+    const now = new Date().toISOString();
+    const prev = await env.HEADLINES_KV.get(GOODNEWS_KV_KEY, 'json');
+    const prevItems = (prev && prev.items) || [];
+    const items = selectFreshItems(prevItems, pool, GOODNEWS_HEADLINE_COUNT);
+    assignFirstSeen(prevItems, items, now);
+    await env.HEADLINES_KV.put(GOODNEWS_KV_KEY, JSON.stringify({ status: 'ok', updatedAt: now, items }));
   } catch (err) {
     console.error('good news refresh failed', err);
   }
+}
+
+// Picks up to `limit` items, preferring ones whose link was NOT shown in the
+// previous refresh so repeated articles get dropped in favor of new stories.
+// Repeats are appended only as a fallback, so the card still fills its slots
+// on a slow news cycle where the feeds haven't produced enough fresh items.
+function selectFreshItems(prevItems, candidates, limit) {
+  const prevLinks = new Set((prevItems || []).map((it) => it && it.link).filter(Boolean));
+  const fresh = [];
+  const repeats = [];
+  candidates.forEach((it) => {
+    if (it.link && !prevLinks.has(it.link)) fresh.push(it);
+    else repeats.push(it);
+  });
+  return fresh.concat(repeats).slice(0, limit);
 }
 
 function itemIsBuddhismRelevant(item) {
@@ -1483,7 +1511,10 @@ async function fetchGoodNewsHeadlines() {
     }
   }
 
-  return dedupeByTitle(candidates).slice(0, GOODNEWS_HEADLINE_COUNT);
+  // Returns the whole deduped pool (not sliced to GOODNEWS_HEADLINE_COUNT):
+  // refreshGoodNews needs the extras so it can skip past articles repeated
+  // from the previous refresh and still fill the carousel with fresh ones.
+  return dedupeByTitle(candidates);
 }
 
 async function refreshHeadlines(env) {
