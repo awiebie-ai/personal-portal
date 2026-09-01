@@ -128,18 +128,20 @@ const BUDDHIST_FEEDS = [
   { name: 'Buddhistdoor Global', url: 'https://www.buddhistdoor.net/feed/', count: 2 }
 ];
 
-// Center-column "Good News" cover-flow card: pooled highlights across two
-// solutions-journalism/feel-good outlets, same pooling pattern as the
-// religion cards above.
+// Center-column "Good News" cover-flow card: pooled highlights across three
+// frequently-updated solutions-journalism/feel-good outlets, same pooling
+// pattern as the religion cards above.
 const GOODNEWS_HEADLINE_COUNT = 7;
 const GOODNEWS_SUMMARY_MAX = 400;
-// Counts are pulled deliberately wider than GOODNEWS_HEADLINE_COUNT so the
-// refresh has a surplus pool to draw from when it drops articles that
-// already appeared last refresh (see selectFreshItems) — without a surplus
-// there'd be nothing fresh to backfill with.
+// Per-source counts sum exactly to GOODNEWS_HEADLINE_COUNT (3 + 2 + 2 = 7) so
+// every refresh shows the newest N from each outlet: the three most current
+// Good News Network stories plus the two most current from each of the other
+// two feeds. RSS items arrive newest-first, so items.slice(0, count) already
+// yields the most current per source (see fetchGoodNewsHeadlines).
 const GOODNEWS_FEEDS = [
-  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 8 },
-  { name: 'Reasons to Be Cheerful', url: 'https://reasonstobecheerful.world/feed/', count: 6 }
+  { name: 'Good News Network', url: 'https://www.goodnewsnetwork.org/feed/', count: 3 },
+  { name: 'The Optimist Daily', url: 'https://www.optimistdaily.com/feed/', count: 2 },
+  { name: 'Positive News', url: 'https://www.positive.news/feed/', count: 2 }
 ];
 
 // Left-column "U.S. Government" card: top 3 items from each of the three
