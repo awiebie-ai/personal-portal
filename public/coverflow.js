@@ -19,6 +19,64 @@
   var CARD_RATIO = 124 / 140;
   var MAX_VIEWPORT_HEIGHT = 320;
 
+  // --- Responsive scaling ---------------------------------------------------
+  // The layout is a fixed 1920x1102 design (see styles.css). Rather than
+  // reflow it for narrower screens, we uniformly scale the whole .page down to
+  // fit the viewport width and let the page scroll vertically for whatever no
+  // longer fits — "shrink to fit width, scroll for the rest". At >=1920px (the
+  // primary monitor) nothing is scaled, so that view is unchanged; at <=720px
+  // the mobile stylesheet takes over instead.
+  var DESIGN_W = 1920;
+  var DESIGN_H = 1102;
+  var MOBILE_MAX = 720;
+  var scaler = document.querySelector('.viewport-scaler');
+  var currentScale = 1;
+
+  function clearScale() {
+    currentScale = 1;
+    scaler.classList.remove('is-scaled');
+    scaler.style.width = '';
+    scaler.style.height = '';
+    page.style.width = '';
+    page.style.height = '';
+    page.style.minHeight = '';
+    page.style.transform = '';
+    page.style.transformOrigin = '';
+    document.documentElement.style.overflowY = '';
+  }
+
+  function updateScale() {
+    var availW = document.documentElement.clientWidth;
+    if (availW >= DESIGN_W || availW <= MOBILE_MAX) {
+      clearScale();
+      return;
+    }
+    // Reserve the vertical scrollbar first so the width we scale against is
+    // stable (otherwise the scrollbar appearing after we size things would
+    // shrink the content area and force a horizontal scrollbar).
+    document.documentElement.style.overflowY = 'scroll';
+    availW = document.documentElement.clientWidth;
+
+    var s = availW / DESIGN_W;
+    currentScale = s;
+    scaler.classList.add('is-scaled');
+    page.style.width = DESIGN_W + 'px';
+    page.style.height = DESIGN_H + 'px';
+    page.style.minHeight = '0';
+    page.style.transformOrigin = 'top left';
+    scaler.style.width = Math.round(DESIGN_W * s) + 'px';
+    scaler.style.height = Math.round(DESIGN_H * s) + 'px';
+    page.style.transform = 'scale(' + s + ')';
+  }
+
+  // The coverflow/side-column heights are derived from getBoundingClientRect(),
+  // which the scaling transform would distort. renderCoverflow() therefore
+  // measures with the transform removed and calls this to restore it before the
+  // frame paints — all synchronous, so nothing flickers.
+  function applyCurrentTransform() {
+    page.style.transform = currentScale < 1 ? 'scale(' + currentScale + ')' : '';
+  }
+
   // CSS flex-grow nested two levels deep (page > section > viewport), with
   // the card sized as a percentage inside it, didn't reliably resolve in
   // the browser — the carousel kept collapsing to nothing. Measuring real
@@ -65,6 +123,9 @@
   }
 
   function renderCoverflow() {
+    // Measure/lay out at true (unscaled) size; restore the scale before paint.
+    page.style.transform = 'none';
+
     var viewportHeight = fitViewportHeight();
     viewport.style.height = viewportHeight + 'px';
 
@@ -78,6 +139,7 @@
       prevBtn.disabled = true;
       nextBtn.disabled = true;
       fitSideColumns();
+      applyCurrentTransform();
       return;
     }
 
@@ -151,6 +213,7 @@
     nextBtn.disabled = activeIndex === goodNewsItems.length - 1;
 
     fitSideColumns();
+    applyCurrentTransform();
   }
 
   prevBtn.addEventListener('click', function () {
@@ -163,6 +226,7 @@
     renderCoverflow();
   });
 
+  updateScale();
   renderCoverflow();
 
   fetch(WORKER_URL + '/good-news')
@@ -186,6 +250,9 @@
   var resizeTimer;
   window.addEventListener('resize', function () {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(renderCoverflow, 150);
+    resizeTimer = setTimeout(function () {
+      updateScale();
+      renderCoverflow();
+    }, 150);
   });
 })();

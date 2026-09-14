@@ -79,6 +79,16 @@ body {
   gap: 12px;
 }
 
+/* Responsive scaling wrapper. On the primary >=1920px monitor this is inert
+   (the .page renders exactly as designed). Below that, updateScale() in
+   coverflow.js forces .page to its fixed 1920x1102 design box and uniformly
+   scales it down to fit the viewport width via transform, sizing this wrapper
+   to the scaled footprint so the page scrolls vertically for whatever is
+   taller than the screen. overflow:hidden clips the unscaled (1920px-wide)
+   layout box so it never produces a horizontal scrollbar. */
+.viewport-scaler { margin: 0 auto; }
+.viewport-scaler.is-scaled { overflow: hidden; }
+
 /* ---- Three-column layout: side cards flank the banner/grid/carousel ---- */
 .layout {
   display: flex;
