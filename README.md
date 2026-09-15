@@ -93,4 +93,4 @@ If you point `script.js`/`coverflow.js`'s `WORKER_URL` at `http://localhost:8787
 
 ## License
 
-No license file is included; all rights reserved by default. Add a `LICENSE` file if you want to permit reuse.
+MIT — see [LICENSE](LICENSE).
