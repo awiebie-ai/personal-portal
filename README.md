@@ -2,7 +2,7 @@
 
 A personal start page / dashboard: a browser-tab replacement that surfaces news, a GitHub activity feed, a task/calendar agenda, weather, government-activity trackers for three countries, five religion-news cards, a "good news" cover-flow carousel, and a bookmarks bar — all on one screen.
 
-**Status: frozen.** This site originally refreshed itself live twice a day. It now serves a static snapshot of its last-ever refresh (captured 2026-09-15) and makes no outbound API calls. See [Frozen snapshot](#frozen-snapshot) below for why, and what it would take to make it live again.
+**Status: frozen.** This site originally refreshed itself live twice a day. It now serves a static snapshot of its last-ever refresh (captured 2026-09-15) and makes no outbound API calls. See [Frozen snapshot](#frozen-snapshot) below for why.
 
 ## Layout
 
@@ -62,35 +62,5 @@ then cached the result of each in Cloudflare KV for the frontend to read.
 
 That pipeline has been removed. The worker now does nothing but serve `worker/src/snapshot.json` — a point-in-time copy of what was in KV — with no cron trigger, no KV binding, no outbound fetches, and no secrets configured. Every card on the site will always show the same content it showed the moment this was frozen, which is why the repo is safe to make public: there's no live connection to any personal account (Todoist, Fastmail, private GitHub repos, or paid APIs) left to expose.
 
-### Making it live again (for your own fork)
+This was my first attempt at vibe coding a site with Claude. I have a full grasp of HTML, advanced knowledge of CSS, and intermediate knowledge of JavaScript. This experience taught me much more than I expected. I learned how to use Claude Code in both a terminal and an IDE. I also learned about workers and APIs and how they integrate with websites. Lastly, I had a great time reading all the news from the sources. I especially liked the Good News section.
 
-If you fork this and want a live-refreshing dashboard instead of a frozen one, you'd need to:
-
-1. Restore a `refreshAll()`-style pipeline in `worker/src/worker.js` that fetches each source and writes to KV (check `git log` on this file for the pre-freeze version as a starting point).
-2. Re-add a `[[kv_namespaces]]` binding and a `[triggers]` cron schedule to `wrangler.toml`.
-3. Set your own secrets with `wrangler secret put <NAME>` for whichever sources you want live — e.g. `TODOIST_API_TOKEN`, `FASTMAIL_ICS_URL` (a private ICS feed URL, from your calendar provider's "share/publish" settings), `GITHUB_TOKEN`, `ANTHROPIC_API_KEY`, `GOVINFO_API_KEY`. None of these are required just to serve the frozen snapshot.
-
-## Running locally
-
-**Frontend** — no build step; serve `public/` with any static file server, e.g.:
-
-```bash
-npx serve public
-# or: python3 -m http.server 8000 --directory public
-```
-
-**Worker**:
-
-```bash
-cd worker
-npm install
-npm run dev      # wrangler dev, local worker at http://localhost:8787
-npm run deploy   # wrangler deploy, ships to Cloudflare
-npm run tail     # wrangler tail, streams logs from the deployed worker
-```
-
-If you point `script.js`/`coverflow.js`'s `WORKER_URL` at `http://localhost:8787` while developing, the local worker will serve the same frozen `snapshot.json` as production.
-
-## License
-
-No license file is included; all rights reserved by default. Add a `LICENSE` file if you want to permit reuse.
