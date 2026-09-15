@@ -1,0 +1,744 @@
+{
+  "headlines": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:12.432Z",
+    "items": [
+      {
+        "title": "Iran war has cost well over $33.4 billion, Pentagon report says",
+        "summary": "The U.S. Defense Department estimated that the Iran war cost $33.4 billion in its first four months, with expenses including $22.3 billion in expended munitions and $3.7 billion in lost equipment, according to an inspector general report released in September 2026. The conflict has created munitions stockpile shortfalls and disrupted critical Middle East shipping lanes, with Iranian-backed Houthi rebels attacking Saudi Arabia and controlling vital waterways, raising global fuel costs and threatening international trade.",
+        "link": "https://www.cbsnews.com/live-updates/iran-war-us-trump-oil-strait-of-hormuz/"
+      },
+      {
+        "title": "Ross Fire still burning, with over 90,000 acres scorched",
+        "summary": "The Ross Fire near Ross in Palo Pinto County, which ignited on August 24, has burned over 90,400 acres and destroyed more than 150 structures while remaining about 91% contained as of mid-September. The fire, now the second-largest wildfire in North Texas, forced evacuations in neighboring Jack County and temporarily disrupted schools and local infrastructure, though all mandatory evacuations have since been lifted and schools have resumed normal operations. Dry conditions combined with lack of rainfall and gusty winds created ideal conditions for rapid fire spread across the region.",
+        "link": "https://www.cbsnews.com/news/ross-fire-near-palo-pinto-high-wildfire-risk/"
+      },
+      {
+        "title": "Delaware holds U.S. Senate primary and more races to watch today",
+        "summary": "Delaware voters are holding their primary elections on Tuesday for U.S. Senate, House, and local races, marking the final primary contests of the 2026 midterm cycle. Democratic Senator Chris Coons is heavily favored to win his primary and secure reelection in November, given Delaware's solidly Democratic lean and a Republican's last Senate victory in the state dating to 1966. Representative Sarah McBride, the first transgender member of Congress, is running unopposed in the Democratic primary but faces three Republican challengers in the general election, including her 2024 opponents.",
+        "link": "https://www.cbsnews.com/news/delaware-primaries-2026-midterm-elections/"
+      },
+      {
+        "title": "Pentagon inspector general says Iran war has caused weapons shortages",
+        "summary": "The Pentagon's inspector general has reported that a six-month war in Iran has cost $33.4 billion and created significant ammunition shortages, with $22.3 billion spent on munitions alone that has revealed supply chain bottlenecks. The war has also resulted in the loss or damage of numerous U.S. military aircraft and drones, plus hundreds of millions in damage to diplomatic facilities across the Middle East. While President Trump has dismissed concerns about weapons depletion, military analysts warn that while current supplies may sustain the Iran conflict, prolonged simultaneous conflicts such as a war with China could create severe ammunition shortfalls within months.",
+        "link": "https://www.cbsnews.com/news/us-iran-war-ammunition-munition-shortage-shortfall-spending/"
+      },
+      {
+        "title": "FBI Director Kash Patel to testify before Senate panel",
+        "summary": "FBI Director Kash Patel is scheduled to testify before the Senate Judiciary Committee, where Democratic senators plan to question him about controversies including staff departures totaling over 1,100 special agents in 2025, relaxed hiring standards that now permit applicants with histories of theft and other conduct previously deemed disqualifying, and allegations of misuse of FBI resources including personal use of government jets. Democrats have criticized Patel's leadership, claiming the FBI is prioritizing protection of President Trump and investigations into his political opponents while diverting resources from protecting ordinary Americans, though the Trump administration has credited its policies with a record 18.1 percent drop in the nation's murder rate in 2025. Patel also faces questions about his use of an FBI jet for personal travel, including a trip to the Winter Olympics, and allegations regarding his drinking and management practices.",
+        "link": "https://www.cbsnews.com/live-updates/fbi-director-kash-patel-testify-senate-panel/"
+      },
+      {
+        "title": "Trump calls Nvidia CEO to talk AI — and gets put on speakerphone during industry summit",
+        "summary": "President Trump called Nvidia CEO Jensen Huang during an industry summit and publicly defended artificial intelligence development, dismissing safety concerns as a \"hoax\" while emphasizing the importance of the U.S. winning the AI race against China. Huang put the call on speakerphone at the event, and the conversation was recorded and shared widely, with Trump also praising data centers as crucial infrastructure for economic growth. Trump's strong support for AI development contrasts with recent calls from other industry leaders and researchers for slowing advancement and implementing safety safeguards.",
+        "link": "https://www.nbcnews.com/politics/donald-trump/nvidia-ceo-jensen-huang-ai-speakerphone-all-hands-meeting-rcna597761"
+      },
+      {
+        "title": "Harry and Meghan change their children’s school over security concerns",
+        "summary": "Prince Harry and Meghan have withdrawn their children from school just days after enrolling them in a new institution following their move back to Britain from California, citing security concerns. According to reports, the couple's security team determined that the school's distance from their residence created traffic exposure risks they could not adequately mitigate. The decision comes as the family awaits a government committee's ruling on whether to provide them publicly-funded security protection during their extended stay in the United Kingdom.",
+        "link": "https://www.nbcnews.com/world/united-kingdom/harry-meghan-children-change-schools-security-concerns-archie-lilibet-rcna597862"
+      },
+      {
+        "title": "Emmys 2026 red carpet and winners: Matthew Rhys, Jean Smart, and more",
+        "summary": "The 78th Primetime Emmy Awards took place at Los Angeles's Peacock Theater, where Matthew Rhys, Jean Smart, and Sally Field were among those making history in their respective categories. The drama series \"Widow's Bay\" won the top prize, dethroning the previous champion \"Hacks\" in a significant upset at the ceremony.",
+        "link": "https://www.nbcnews.com/pop-culture/pop-culture-news/red-carpet-emmys-photos-looks-2026-rcna597760"
+      },
+      {
+        "title": "The 2026 Emmys air tonight. Here’s what to expect, how to watch and who’s hosting.",
+        "summary": "The 2026 Primetime Emmy Awards ceremony will air tonight at 8 p.m. ET from the Peacock Theater in Los Angeles, with Mariska Hargitay hosting and coverage available on NBC or Peacock. Leading the nominations are \"The Pitt\" with 25 nods and \"Hacks\" with 24, while first-season shows like \"Widow's Bay\" and \"Pluribus\" have also earned significant recognition alongside returning favorites like \"The Bear\" and \"Abbott Elementary.\"",
+        "link": "https://www.nbcnews.com/pop-culture/pop-culture-news/emmys-2026-time-host-how-watch-streaming-channel-rcna597317"
+      }
+    ]
+  },
+  "github": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:01:38.590Z",
+    "items": [
+      {
+        "name": "personal-portal",
+        "fullName": "awiebie-ai/personal-portal",
+        "description": "",
+        "url": "https://github.com/awiebie-ai/personal-portal",
+        "language": "JavaScript",
+        "languageColor": "#f1e05a",
+        "visibility": "Private",
+        "openIssues": 0,
+        "updatedAt": "2026-09-14T17:22:25Z",
+        "latestCommit": {
+          "message": "Make site responsive to laptops",
+          "date": "2026-09-14T17:22:16Z"
+        }
+      },
+      {
+        "name": "prompt-eng-interactive-tutorial",
+        "fullName": "awiebie-ai/prompt-eng-interactive-tutorial",
+        "description": "Anthropic prompt engineering interactive tutorial ",
+        "url": "https://github.com/awiebie-ai/prompt-eng-interactive-tutorial",
+        "language": "Jupyter Notebook",
+        "languageColor": "#DA5B0B",
+        "visibility": "Private",
+        "openIssues": 0,
+        "updatedAt": "2026-05-07T19:10:43Z",
+        "latestCommit": {
+          "message": "Complet tutorials 3-5",
+          "date": "2026-05-07T19:10:39Z"
+        }
+      }
+    ]
+  },
+  "todoist": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:01:37.580Z",
+    "items": [
+      {
+        "id": "6hQ2849Gv4prJwMp",
+        "content": "Get that book you saw on Bill's show",
+        "url": "https://todoist.com/showTask?id=6hQ2849Gv4prJwMp",
+        "priority": 1,
+        "priorityColor": "#808080",
+        "due": null,
+        "project": {
+          "name": "Inbox",
+          "color": "#808080"
+        }
+      }
+    ]
+  },
+  "calendar": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:01:38.168Z",
+    "items": []
+  },
+  "weather": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:01:38.081Z",
+    "items": [
+      {
+        "id": "cabo-rojo",
+        "name": "Cabo Rojo, PR",
+        "tempF": 75,
+        "feelsLikeF": 82,
+        "humidity": 85,
+        "windMph": 4,
+        "condition": "Clear sky",
+        "icon": "sun",
+        "highF": 87,
+        "lowF": 73,
+        "forecast": [
+          {
+            "day": "Wed",
+            "icon": "storm",
+            "condition": "Thunderstorm",
+            "highF": 87,
+            "lowF": 75,
+            "rainChance": 86
+          },
+          {
+            "day": "Thu",
+            "icon": "rain",
+            "condition": "Rain showers",
+            "highF": 88,
+            "lowF": 76,
+            "rainChance": 90
+          },
+          {
+            "day": "Fri",
+            "icon": "rain",
+            "condition": "Drizzle",
+            "highF": 89,
+            "lowF": 75,
+            "rainChance": 32
+          }
+        ]
+      },
+      {
+        "id": "griffin",
+        "name": "Griffin, GA",
+        "tempF": 68,
+        "feelsLikeF": 72,
+        "humidity": 86,
+        "windMph": 4,
+        "condition": "Clear sky",
+        "icon": "sun",
+        "highF": 95,
+        "lowF": 68,
+        "forecast": [
+          {
+            "day": "Wed",
+            "icon": "cloud",
+            "condition": "Overcast",
+            "highF": 91,
+            "lowF": 70,
+            "rainChance": 3
+          },
+          {
+            "day": "Thu",
+            "icon": "sun",
+            "condition": "Clear sky",
+            "highF": 90,
+            "lowF": 64,
+            "rainChance": 2
+          },
+          {
+            "day": "Fri",
+            "icon": "rain",
+            "condition": "Rain showers",
+            "highF": 92,
+            "lowF": 67,
+            "rainChance": 6
+          }
+        ]
+      }
+    ]
+  },
+  "gov-us": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:15.579Z",
+    "branches": [
+      {
+        "name": "White House",
+        "items": [
+          {
+            "title": "Nominations Sent to the Senate",
+            "summary": "The White House sent nominations to the Senate for approximately 40 positions across the federal government, including judges, cabinet-level officials, and ambassadors. The judicial nominations include 15 appointments to federal district courts across various states, one Circuit Court judge for the Eighth Circuit, one Court of Appeals judge for Veterans Claims, and two reappointments to the Sentencing Commission. The administration also nominated candidates for significant executive positions including Secretary of the Navy, Commissioner of Food and Drugs, ambassadors to multiple countries including Saudi Arabia and Haiti, and various assistant secretaries across departments like Commerce, Treasury, Housing and Urban Development, and State. The nominations span the breadth of federal government operations, from domestic agencies to international diplomatic posts. These nominees now require Senate confirmation before they can assume their positions.",
+            "link": "https://www.whitehouse.gov/presidential-actions/2026/09/nominations-sent-to-the-senate-9fc3/",
+            "firstSeenAt": "2026-09-14T23:01:32.351Z"
+          },
+          {
+            "title": "Warrior Ethos in Action: DUDE 44 Bravo’s Incredible Story",
+            "summary": "A U.S. Air Force officer whose call sign was DUDE 44 Bravo publicly shared his story for the first time in a 60 Minutes interview after being shot down over Iran in April. Following the loss of his F-15E Strike Eagle, Bravo and his pilot ejected and landed miles apart behind enemy lines, triggering one of the most daring rescue operations in modern military history. Bravo was rescued on Easter Sunday, and both aviators returned safely with no American lives lost in the operation. The White House presented the account as exemplifying military bravery and the Trump Administration's commitment to combat readiness, military standards, and the principle of leaving no one behind. The story was highlighted as demonstrating the administration's broader priorities in military affairs and as a demonstration of American warfighting capability.",
+            "link": "https://www.whitehouse.gov/releases/2026/09/warrior-ethos-in-action-dude-44-bravos-incredible-story/",
+            "firstSeenAt": "2026-09-14T23:01:32.351Z"
+          },
+          {
+            "title": "Presidential Message on the Anniversary of the Battle of Fort McHenry",
+            "summary": "The White House issued a presidential message commemorating the 210th anniversary of the Battle of Fort McHenry in September 1814, when approximately 1,000 American soldiers and militia defended the Baltimore harbor fort against a sustained British naval bombardment lasting 27 hours during the War of 1812. Despite intense cannon fire from the British fleet, American forces successfully held the fort, and when dawn broke the following morning, the American flag still flew over the damaged fortification. Witnessing this scene from a nearby vessel, lawyer Francis Scott Key was inspired to pen \"The Star-Spangled Banner,\" which later became the nation's national anthem. The message frames the battle as a critical turning point in the war, occurring when British forces had already attacked Washington D.C. by burning the White House and Capitol building, and were attempting to capture Baltimore as a vital port to force American surrender. The White House emphasized that the defense of Fort McHenry demonstrates the importance of American determination and courage in preserving national freedom and sovereignty. The message connects this historical victory to contemporary themes of defending national values and restoring American pride.",
+            "link": "https://www.whitehouse.gov/briefings-statements/2026/09/presidential-message-on-the-anniversary-of-the-battle-of-fort-mchenry/",
+            "firstSeenAt": "2026-09-13T23:01:29.388Z"
+          }
+        ]
+      },
+      {
+        "name": "Congress",
+        "items": [
+          {
+            "title": "Congressional Record — September 10, 2026",
+            "summary": "On September 10, 2026, Congress held a brief session marked primarily by commemoration of the 25th anniversary of the September 11, 2001 terrorist attacks. The Senate met in pro forma session for less than one minute before adjourning until Monday, September 14, while the House convened for only three minutes to pass House Resolution 1520, expressing the sense of the House regarding the 9/11 attacks, and then adjourned as a mark of respect to the victims. In the House, 25 public bills and 10 resolutions were introduced, and seven committee reports were filed covering various matters including sunset provisions for the Advisory Committee on the Records of Congress, Government Publishing Office authorities, National Park System lease extensions, Federal land transfers in Nevada, a dog adoption pilot program for Customs and Border Protection, homeland security agroterrorism exercises, and utility regulatory policy updates. No votes were taken on substantive legislation, and no committee hearings or meetings were held on either side of the Capitol. Two Senate bills, S. 1051 and S. 1377, were referred to the Committee on Natural Resources for future consideration.",
+            "link": "https://www.govinfo.gov/app/details/CREC-2026-09-10",
+            "firstSeenAt": "2026-09-11T11:01:48.286Z"
+          },
+          {
+            "title": "Congressional Record — September 8, 2026",
+            "summary": "On September 8, 2026, both chambers of Congress held abbreviated sessions with minimal legislative activity. The Senate met only in pro forma session for a few minutes before adjourning until September 10. The House convened briefly and adjourned after just three minutes, during which Speaker pro tempore Meuser was appointed and the Chair announced that the Speaker had certified to the U.S. Attorney for the District of Columbia the refusal of Michael Joseph and Hector Roos to comply with subpoenas from the Committee on Ethics. The House introduced 22 new bills and 6 resolutions, and committees reported out 13 bills with amendments addressing various matters including veterans' education benefits, tax administration, civil rights transparency in education, artificial intelligence applications to tax enforcement, and franchise business protections. No votes were taken, no committee hearings were held, and no joint committee meetings occurred on this largely procedural day.",
+            "link": "https://www.govinfo.gov/app/details/CREC-2026-09-08",
+            "firstSeenAt": "2026-09-09T23:01:46.755Z"
+          },
+          {
+            "title": "Congressional Record — September 4, 2026",
+            "summary": "On September 4, 2026, both chambers of Congress held brief pro forma sessions with minimal legislative activity. The Senate convened at 10:00 a.m. for less than a minute before adjourning until 1:15 p.m. on Tuesday, September 8, while the House met at 10 a.m. and adjourned at 10:02 a.m. In the House, six public bills numbered H.R. 10298 through 10303 and two resolutions, H. Res. 1512 and 1513, were introduced, though no votes, quorum calls, or committee hearings took place. The Speaker appointed Representative Simpson to serve as Speaker pro tempore for the day. No committee meetings were held in either chamber, and no joint committee meetings occurred. Both chambers are scheduled to reconvene on Tuesday, September 8, in pro forma session with no hearings or substantive business currently scheduled.",
+            "link": "https://www.govinfo.gov/app/details/CREC-2026-09-04",
+            "firstSeenAt": "2026-09-05T23:01:51.734Z"
+          }
+        ]
+      },
+      {
+        "name": "Supreme Court",
+        "items": [
+          {
+            "title": "National Republican Congressional Committee v. Brown (9/04/26)",
+            "summary": "In this emergency application decided on September 4, 2026, the Supreme Court granted a stay of a Fourth Circuit Court of Appeals decision that had invalidated an FCC public notice expanding the lowest unit charge (LUC) requirements for broadcast advertising. The lowest unit charge is a statutory requirement that broadcasters offer favorable advertising rates to candidates during election periods, and the FCC's notice extended this benefit to political parties and joint fundraising committees engaged in coordinated political activity. Four Democratic congressional candidates challenged the notice by filing both an application for review with the FCC and, before the FCC had ruled, a petition for judicial review in the Fourth Circuit. The Fourth Circuit found it had jurisdiction and sided with the candidates, but the Supreme Court found it \"likely lacked statutory jurisdiction\" because the Communications Act requires parties to wait for the FCC to resolve administrative applications before seeking judicial review in federal court. The Court emphasized that this interpretation aligns with every other Circuit Court to address the issue and that the statutory language contemplates a sequential process: application to the Commission, Commission order, and only then petition to court. The Court granted the stay partly because the party committees demonstrated irreparable harm, as broadcasters were already rescinding favorable rates in response to the Fourth Circuit's decision, thereby impairing the committees' ability to purchase political advertising in the critical weeks before midterm elections. This decision matters because it clarifies important procedural requirements for challenging FCC decisions and protects the availability of discounted political advertising rates for party committees in the weeks immediately before elections.",
+            "link": "https://www.supremecourt.gov/opinions/25pdf/26a274_l537.pdf",
+            "firstSeenAt": "2026-09-04T23:01:32.162Z"
+          },
+          {
+            "title": "National Park Service v. National Trust for Historic Preservation in the United States (8/31/26)",
+            "summary": "In National Park Service v. National Trust for Historic Preservation, the Supreme Court addressed whether the National Trust had legal standing to challenge a White House renovation project that involved demolishing the existing East Wing and constructing a new one with a below-ground military installation and above-ground ballroom. The National Trust relied on a declaration from a single member who lived in Washington D.C. and visited the area monthly, claiming she would suffer aesthetic, cultural, and historical injuries from viewing the new ballroom's design. The Court granted the government's request to stay a lower court's preliminary injunction that had halted above-ground construction, holding that the government was likely to succeed on the merits by demonstrating that the Trust lacked Article III standing because mere aesthetic disagreement or distaste does not constitute a concrete and particularized injury required by the Constitution. The Court emphasized its longstanding precedent that psychological distress from viewing government conduct one finds objectionable is insufficient for standing and that accepting such claims would open federal courts to virtually unlimited litigation by anyone offended by any government action. This decision matters because it reaffirms the standing doctrine as a crucial constitutional limitation on federal court jurisdiction, preventing organizations and individuals from suing based solely on generalized grievances or aesthetic preferences about government projects.",
+            "link": "https://www.supremecourt.gov/opinions/25pdf/26a203_2b8e.pdf",
+            "firstSeenAt": "2026-08-31T23:01:43.943Z"
+          },
+          {
+            "title": "Trump v. California (8/24/26)",
+            "summary": "In Trump v. California, the Supreme Court addressed whether states had legal standing to challenge a presidential executive order concerning election integrity. The executive order directed federal agencies to create citizenship lists for states, prioritize prosecution of officials issuing ballots to ineligible voters, and initiate a postal service rulemaking regarding ballot envelope tracking, though none of these directives imposed binding obligations on the states themselves. The District Court had ruled that the order unconstitutionally infringed on state election authority and issued an injunction blocking implementation, but the Government appealed and sought a stay of that injunction pending appeal. The Supreme Court granted the stay, finding that the Government was likely to succeed on its jurisdictional argument that the states lacked standing because the executive order was merely an internal directive to federal agencies that imposed no concrete obligations on the states and caused them no direct injury. The Court reasoned that any harm to the states would be speculative and dependent on future discretionary actions by executive officials rather than the order itself, making the case unripe for adjudication. This decision matters because it establishes that states cannot sue to challenge presidential directives that do not directly mandate or prohibit state conduct, potentially limiting state ability to challenge federal election-related policies through the courts.",
+            "link": "https://www.supremecourt.gov/opinions/25pdf/26a124_hgci.pdf",
+            "firstSeenAt": "2026-08-28T11:35:14.596Z"
+          }
+        ]
+      }
+    ]
+  },
+  "gov-cn": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:07.825Z",
+    "branches": [
+      {
+        "name": "Xinhua",
+        "items": [
+          {
+            "title": "Xi Story: Making canals channels for connectivity, prosperity, better life",
+            "summary": "The Pinglu Canal, a major river-to-sea waterway project in Guangxi Zhuang Autonomous Region in southern China, officially opened on September 16, connecting China's inland regions to Southeast Asian markets via the Beibu Gulf. The canal, which links the Xijiang River shipping route to the gulf, is expected to reduce shipping distances to ASEAN countries by 560 kilometers and cut logistics costs by 18 to 30 percent, according to regional government officials. Chinese President Xi Jinping inspected the canal's construction in December 2023 and emphasized the strategic importance of maritime development and waterway connectivity for Guangxi's economic growth. The article draws parallels between the Pinglu Canal and China's ancient Grand Canal, which Xi has championed for protection and revitalization, framing both as examples of how waterway infrastructure fosters prosperity and improves people's livelihoods. Local residents and entrepreneurs are already seeing benefits from the project, including new employment opportunities, infrastructure development such as schools and villages, and emerging businesses along the canal route. The canal represents a continuation of historical maritime trade traditions, echoing the region's Song Dynasty past when Qinzhou was a major port for ceramics and sugar shipments along the Maritime Silk Road.",
+            "link": "https://english.news.cn/20260915/7e4f185bc67847238f4b766d4d84f1d2/c.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Xi's article on advancing basic research to be published",
+            "summary": "Chinese President Xi Jinping has written an article on strengthening basic research that will be published in the 18th issue of Qiushi Journal, the Communist Party's flagship magazine, on Wednesday. The article addresses the advancement of fundamental scientific research as a priority topic. Xi, who holds the positions of general secretary of the CPC Central Committee, Chinese president, and chairman of the Central Military Commission, authored the piece for one of the Party's most authoritative publications. The publication of such articles in Qiushi Journal typically signals important policy directions and ideological guidance from China's top leadership. This publication reflects the Chinese government's emphasis on basic research as a key component of national development strategy.",
+            "link": "https://english.news.cn/20260915/9dafee164ec5417a8a48c32237c2b879/c.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Xinhua Commentary: Strategic, long-term vision needed for China-India ties",
+            "summary": "Chinese President Xi Jinping and Indian Prime Minister Narendra Modi met on the sidelines of the BRICS Summit in New Delhi, producing consensus that the two nations should be partners and reaffirming their commitment to improving bilateral relations. The article emphasizes that China views its relationship with India strategically and long-term, calling for both countries to use objective perception, mutual respect, and win-win cooperation to address issues while removing irritants. As the world's two most populous countries and major developing nations, China and India should see each other as offering development opportunities rather than threats, according to the commentary. The piece invokes the Five Principles of Peaceful Coexistence, a foundational concept in China-India relations dating back decades, and calls for the two nations to advance cooperation on border issues and bilateral development simultaneously. The commentary stresses that both countries are undergoing critical modernization periods where development is their greatest common interest, and as Global South leaders, they should work together to strengthen BRICS cooperation and promote a multipolar world order.",
+            "link": "https://english.news.cn/20260915/420585d4ff57404c83a5153c11ceba5b/c.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "China Focus: China reallocates educational resources to match changing school-age population",
+            "summary": "China is reassigning primary school teachers to secondary schools as part of a broader effort to address demographic shifts in its school-age population. The pilot program, currently underway in Shanghai and provinces including Fujian, Anhui, Hubei, and Jiangxi, responds to declining primary school enrollment and teacher surpluses while secondary schools face shortages. According to the Ministry of Education, primary school enrollment peaked in 2023, middle school enrollment is expected to peak in 2026, and high school enrollment in 2029, creating a \"wave-like\" mismatch between teacher supply and demand. Experts emphasize that simply transferring teachers requires proper training and certification; Shanghai's Jing'an district has launched a one-year training program for teachers moving to higher educational levels. Beyond teacher reallocation, localities are converting idle school buildings into nursing homes, welfare centers, factories, and cultural sites, with Yongren County alone saving 91.6 million yuan through such conversions. The reallocation represents a shift in China's education priorities from ensuring sufficient teacher numbers to improving teaching quality across its system of 430,000 schools serving 220 million students.",
+            "link": "https://english.news.cn/20260915/ca85a00962bd4194b24ac98bd1f18a2a/c.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Xi's article on advancing basic research to be published",
+            "summary": "Xi Jinping published an article in the Communist Party's flagship Qiushi Journal on Wednesday emphasizing the importance of strengthening China's basic research capabilities. The article argues that basic research forms the foundation of scientific advancement and represents a key frontier in global technological competition, noting that China currently lags behind other leading scientific nations in this area. Xi calls for concrete measures to enhance original innovation capacity, optimize the allocation of basic research funding, develop scientific talent especially among young people, and expand research infrastructure including AI-enabled platforms. The article also advocates for greater coordination between applied and basic disciplines while encouraging interdisciplinary collaboration. Additionally, Xi stresses the importance of integrating China into the global innovation network through international cooperation and participation in major scientific projects. The piece reflects Beijing's strategic focus on positioning China as a leader in science and technology through sustained investment in foundational research.",
+            "link": "https://english.news.cn/20260915/fc750fa2525f4d3293da80a02e08e26d/c.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          }
+        ]
+      },
+      {
+        "name": "The State Council",
+        "items": [
+          {
+            "title": "Xi's article on advancing basic research to be published",
+            "summary": "Xi Jinping has written an article on strengthening basic research that will be published in the Qiushi Journal, the Communist Party's flagship magazine. In the article, Xi emphasizes that basic research is fundamental to China's scientific system and critical for global technological competition, while acknowledging that China currently lags behind world leaders in this area. He calls for concrete measures to enhance China's capacity for original innovation and achieve greater scientific and technological self-reliance, including optimizing the layout of basic research, clarifying priority areas, and promoting coordination between applied and basic disciplines. The article stresses the importance of expanding the talent pool for basic research, particularly by inspiring young people to pursue it as a lifelong career, and proposes gradually increasing funding for basic research while developing major scientific infrastructure and AI-empowered research platforms. Xi also advocates for China's active participation in the global innovation network through openness and cooperation, including leading international scientific programs and taking part in global scientific governance. The article matters because it signals the Chinese leadership's strategic priority on strengthening foundational scientific capabilities as part of efforts to establish China as a leading technological power.",
+            "link": "https://english.www.gov.cn/news/202609/15/content_WS6aa901a3c6d00ca5f9a0d36d.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "China releases 5-year development plan for electronic information manufacturing sector",
+            "summary": "China has released a five-year development plan for its electronic information manufacturing sector covering 2026 to 2030, aiming to establish the industry as a global leader. The plan, issued jointly by the Ministry of Industry and Information Technology and the National Development and Reform Commission, targets combined revenue exceeding 30 trillion yuan (approximately 2.96 million U.S. dollars) for firms with annual revenue of at least 20 million yuan by 2030. The strategy prioritizes developing competitive technological and product strengths in integrated circuits, advanced computing, consumer electronics, basic electronics, and energy electronics. The government plans to invest 3.5 percent of sector revenue into research and development while significantly increasing the adoption rate of next-generation intelligent terminals. This initiative reflects China's broader commitment to strengthening its position in advanced manufacturing and high-technology industries amid ongoing global competition.",
+            "link": "https://english.www.gov.cn/news/202609/15/content_WS6aa8d957c6d00ca5f9a0d314.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Xi urges Chinese police to remain committed to serving people with responsibility, dedication",
+            "summary": "Chinese President Xi Jinping issued a letter to a police unit in Zhangzhou, Fujian Province, calling on all police officers in China to remain dedicated to serving the people and maintaining social stability. Xi praised the \"Zhangzhou 110\" police unit for its grassroots work and commended its development of a rapid response emergency call system since 1990 that has been effective in combating crime and serving communities. He emphasized that police bear an important responsibility for protecting public safety and the country's peace, urging officers to uphold traditions and address the needs and concerns of citizens. The \"Zhangzhou 110\" unit is recognized as an exemplary primary-level police force within China's system, and members recently wrote to Xi reporting on their work. Xi's remarks reflect the Chinese government's emphasis on police loyalty to both the Communist Party and public service. The letter underscores the state's focus on maintaining public order and the role of police forces in achieving this objective.",
+            "link": "https://english.www.gov.cn/news/202609/15/content_WS6aa8b512c6d00ca5f9a0d2ff.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Chinese, French FMs discuss ties, int'l issues over phone",
+            "summary": "Chinese Foreign Minister Wang Yi and French Foreign Minister Jean-Noel Barrot held a phone conversation on Monday in which they discussed bilateral relations and international issues. Wang emphasized that China and France, both permanent UN Security Council members, should strengthen strategic communication to address global risks and challenges, and he urged France to uphold the one-China principle while refraining from official engagement with Taiwan. Wang also called on the EU and China to pursue mutually beneficial cooperation and resolve economic and trade tensions through dialogue rather than protectionism, arguing that China's development represents an opportunity rather than a threat to Europe. Barrot affirmed France's commitment to the one-China policy and expressed France's readiness to promote constructive engagement between the EU and China to resolve their economic and trade difficulties. The two officials also exchanged views on regional issues including Iran and Ukraine, with Wang presenting China's four-point proposal for a new Middle East security architecture as a contribution to regional stability.",
+            "link": "https://english.www.gov.cn/news/202609/15/content_WS6aa8adefc6d00ca5f9a0d2fd.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          },
+          {
+            "title": "Chinese FM holds phone talks with Latvian counterpart on ties",
+            "summary": "Chinese Foreign Minister Wang Yi held phone talks with Latvian Foreign Minister Baiba Braze on Monday to discuss bilateral relations, marking the 35th anniversary of diplomatic ties between the two countries. The conversation focused significantly on a recent disaster in Nepal and China's Xizang Autonomous Region where an ice-rock avalanche triggered mudslides, with 33 Latvian citizens reported missing and Latvia being the European country most affected. Both ministers expressed appreciation for China's search and rescue efforts and its cooperation in handling the aftermath, with Wang reaffirming China's commitment to continue rescue operations and assist all missing persons regardless of nationality. Wang highlighted the historically strong relationship between China and Latvia, noting that China was among the first countries to recognize Latvia's independence and that the two nations have maintained equal and respectful relations since establishing diplomatic ties. The ministers discussed ongoing cooperation including people-to-people exchanges and China's unilateral visa-free policy for Latvian citizens, with both sides agreeing to further strengthen communication and bilateral relations using the anniversary as an opportunity.",
+            "link": "https://english.www.gov.cn/news/202609/15/content_WS6aa8ab35c6d00ca5f9a0d2f2.html",
+            "firstSeenAt": "2026-09-15T11:02:07.825Z"
+          }
+        ]
+      }
+    ]
+  },
+  "gov-ru": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:06.736Z",
+    "branches": [
+      {
+        "name": "The Kremlin",
+        "items": [
+          {
+            "title": "Birthday greetings to animator Yury Norshteyn",
+            "summary": "Vladimir Putin sent birthday greetings to renowned animator Yury Norshteyn on his 85th birthday, praising him as a People's Artist of Russia and USSR State Prize winner. In his message, Putin described Norshteyn's films as masterpieces of Russian and world animation that exemplify artistic excellence and skill. Norshteyn is a celebrated Soviet and Russian director whose animated works, including Hedgehog in the Fog, The Heron and the Crane, and Tale of Tales, have achieved international recognition and won numerous prestigious awards. Putin noted that Norshteyn's films are beloved by audiences across generations and serve as a professional standard for younger animators carrying forward Russian animation traditions. The acknowledgment reflects the Russian government's recognition of Norshteyn's significant contributions to animation as both a cultural legacy and influential body of work.",
+            "link": "http://en.kremlin.ru/events/president/news/80767",
+            "firstSeenAt": "2026-09-15T11:02:06.736Z"
+          },
+          {
+            "title": "Greetings to participants and guests of High Technology Championship finals",
+            "summary": "Vladimir Putin sent greetings to participants and guests at the High Technology Championship finals held in Veliky Novgorod, a competition bringing together college and senior school students from across Russia. The championship focuses on the domestic transport sector and evaluates competencies aligned with the industry's personnel requirements. Putin emphasized in his message that the transport sector's workers are critical to Russia's economic and technological sovereignty, the development of logistics routes, and citizens' quality of life. He expressed confidence that the finalists would demonstrate their knowledge and skills while serving as examples to their peers. Putin also recognized the contributions of teachers, mentors, and championship partners in supporting contestants. The event reflects the Russian government's focus on developing skilled workers in strategic sectors through competitive platforms for young people entering the workforce.",
+            "link": "http://en.kremlin.ru/events/president/news/80765",
+            "firstSeenAt": "2026-09-15T11:02:06.736Z"
+          },
+          {
+            "title": "Meeting with Novgorod Region Governor Alexander Dronov",
+            "summary": "Governor Alexander Dronov briefed President Putin on the Novgorod Region's development, highlighting a special economic zone established in 2021 that has attracted over 9 billion rubles in investment commitments and created around 2,600 new jobs, with eight resident companies already in production including a reinforced concrete plant and Sber Group's television manufacturing facility. The region is developing an integrated workforce training system alongside its economy, including a new university campus opening in 2027 designed to accommodate 4,000 students and education-industry clusters in fields such as chemical production, electronics, and construction. The discussion covered demographic initiatives to support large families and healthcare recruitment, noting that 283 apartments have been purchased for medical workers since 2019 under a seven-year privatization program. Dronov reported on cultural heritage preservation efforts in Veliky Novgorod, one of Russia's oldest cities, including the completion of church restoration projects and ongoing work on major landmarks like the Millennium of Russia monument and St Sophia Cathedral belfry. The region has improved 665 public spaces and won 17 national awards for small town development, while establishing support programs for military operation participants and their families. Putin noted that over half the region's schools require repairs, recommending that Dronov personally oversee a comprehensive repair, renovation, and equipment program funded through federal and municipal coordination.",
+            "link": "http://en.kremlin.ru/events/president/news/80761",
+            "firstSeenAt": "2026-09-14T23:01:22.911Z"
+          },
+          {
+            "title": "Greetings on the 160th anniversary of the Tchaikovsky Moscow State Conservatoire",
+            "summary": "Russian President Vladimir Putin issued a congratulatory message to mark the 160th anniversary of the Tchaikovsky Moscow State Conservatory, one of the world's most prestigious music institutions. In his statement, Putin praised the founders and historical figures who established the conservatory's traditions of artistic dedication and service to music. He characterized the institution as a globally recognized center of culture and education that has produced talented musicians who have brought prestige to Russia and attracted classical music enthusiasts worldwide. Putin expressed confidence that the conservatory would continue to nurture young musical talent while honoring its historical legacy and creative traditions. The message reflects the Russian government's emphasis on cultural institutions as sources of national pride and soft power in the international sphere.",
+            "link": "http://en.kremlin.ru/events/president/news/80762",
+            "firstSeenAt": "2026-09-14T23:01:22.911Z"
+          },
+          {
+            "title": "Greetings to participants and guests of the 2026 International Youth Festival",
+            "summary": "President Vladimir Putin delivered a greeting to participants and guests at the 2026 International Youth Festival, held in Yekaterinburg, a major industrial and cultural center in the Urals region. Putin highlighted Yekaterinburg's historical significance as a location where Europe and Asia meet, and where Russia's industrial and intellectual traditions were established. He outlined his vision for youth-led global cooperation, emphasizing values such as friendship, peace, and equal access to technology, medicine, food, water, and education across all nations and regardless of socioeconomic background. Putin stressed that every nation should have the freedom to independently choose its own development path and called for the younger generation to work toward building a more just and open world. He invited international participants to either join projects within Russia or contribute to this shared vision in their home countries. The message framed youth leadership and international collaboration as key to shaping humanity's future amid technological change.",
+            "link": "http://en.kremlin.ru/events/president/news/80756",
+            "firstSeenAt": "2026-09-13T23:01:23.325Z"
+          }
+        ]
+      },
+      {
+        "name": "Government of Russia",
+        "items": [
+          {
+            "title": "Alexei Overchuk takes part in the Second Forum of Regions of Russia and Mongolia",
+            "summary": "The Second Forum of Regions of Russia and Mongolia took place in Ulaanbaatar on September 14-15, bringing together over 220 representatives from government, business, and expert circles across 14 regions of both countries. Led by Russian Deputy Prime Minister Alexei Overchuk and Mongolian First Deputy Prime Minister Jadambyn Enkhbayar, the forum focused on strengthening economic ties, improving transport connectivity, and implementing a new Provisional Trade Agreement that entered into force in July 2026. Bilateral trade between the countries has grown substantially, reaching $2.69 billion in 2025 and increasing 18 percent in the first half of 2026, with the trade agreement now providing duty-free access to EAEU markets for Mongolian products including wool, cashmeric, leather, and meat. The forum addressed multiple sectors including tourism, which has generated nearly 500,000 mutual trips annually, railway freight operations setting new records, and humanitarian cooperation such as the allocation of 620 university scholarships for Mongolian students. The event concluded with the signing of regional cooperation agreements and commercial contracts, reflecting deepening interregional ties across more than 60 Russian constituent entities and highlighting successful examples such as Bryansk region's locomotive exports to Mongolia's railways.",
+            "link": "http://government.ru/en/news/59868/",
+            "firstSeenAt": "2026-09-14T23:01:22.911Z"
+          },
+          {
+            "title": "Alexei Overchuk meets with Mongolia’s First Deputy Prime Minister and Minister of the Economy and Development Jadambyn Enkhbayar",
+            "summary": "Russian Deputy Prime Minister Alexei Overchuk met with Mongolia's First Deputy Prime Minister and Minister of the Economy and Development Jadambyn Enkhbayar in Ulaanbaatar during the second Forum of Regions of Russia and Mongolia to discuss bilateral trade and economic cooperation. The officials noted increased high-level contacts between the countries, including recent meetings between their presidents and prime ministers in September, which they characterized as demonstrating mutual importance. The talks focused on implementing the Provisional Trade Agreement between the Eurasian Economic Union and Mongolia that took effect on August 22, 2026, which provides duty-free trade on approximately 90 percent of mutual goods, and addressed cooperation in transport connectivity, energy, industry, and agriculture. Bilateral trade has grown significantly, increasing 1.4 times over five years to $2.7 billion and rising 18 percent in the first five months of 2026 to $1.3 billion, with Russia serving as Mongolia's second-largest import source. The first meeting of the Joint Committee for implementing the trade agreement was held simultaneously in Ulaanbaatar, where officials discussed eliminating non-tariff barriers and expanding market access. Both sides committed to strengthening the Russia-Mongolia-China Economic Corridor and continuing cooperation to maximize the benefits of free trade between the two countries.",
+            "link": "http://government.ru/en/news/59867/",
+            "firstSeenAt": "2026-09-14T23:01:22.911Z"
+          },
+          {
+            "title": "Alexei Overchuk takes part in a CIS Economic Council meeting",
+            "summary": "Deputy Prime Minister Alexei Overchuk participated in the 111th meeting of the Commonwealth of Independent States Economic Council held in Ashgabat, Turkmenistan, where member nations discussed economic cooperation and coordination on various initiatives. The council approved twelve draft documents and action plans covering advanced materials for high-tech industries, digital transformation of the timber sector, transport security from 2026 to 2030, harmonization of air traffic management systems, and an innovative cooperation program through 2030. Additional approvals included joint measures to prevent and combat brucellosis across CIS territories through 2032, aimed at minimizing economic damage from the disease. These agreements represent efforts to transition from bilateral projects to multilateral cooperation frameworks and to improve safety, efficiency, and competitiveness across multiple economic sectors within the Commonwealth. The approved documents will now be forwarded to the CIS Council of Heads of Government for further consideration, with the next Economic Council meeting scheduled for Moscow on November 27.",
+            "link": "http://government.ru/en/news/59851/",
+            "firstSeenAt": "2026-09-11T23:01:17.442Z"
+          },
+          {
+            "title": "Denis Manturov meets with Minister of Finance of the Republic of India Nirmala Sitharaman",
+            "summary": "Russian First Deputy Prime Minister Denis Manturov met with Indian Finance Minister Nirmala Sitharaman in New Delhi to discuss bilateral financial cooperation. The two officials focused on establishing sustainable payment arrangements to support the growth of trade, economic relations, and investment between the two countries. Additionally, they discussed the development of an intergovernmental agreement aimed at promoting and protecting mutual investments. The meeting reflects ongoing efforts by Russia and India to strengthen their economic ties and create frameworks that facilitate increased commercial activity between them.",
+            "link": "http://government.ru/en/news/59845/",
+            "firstSeenAt": "2026-09-11T23:01:17.442Z"
+          },
+          {
+            "title": "Dmitry Patrushev: Russia is interested in strengthening strategic cooperation with Jordan",
+            "summary": "Russian Deputy Prime Minister Dmitry Patrushev and Jordanian Minister of Industry, Trade, and Supply Yarub Qudah co-chaired the seventh meeting of the Russian-Jordanian Intergovernmental Commission in Moscow to discuss expanding bilateral cooperation across multiple sectors including industry, agriculture, geology, healthcare, and education. Bilateral trade between the two countries grew by one-third during the first half of 2026, with agricultural products representing a significant portion of their exchange, and Russia identified considerable potential for expanded industrial cooperation and geological exploration partnerships. The two officials signed a final protocol documenting the meeting's outcomes along with additional agreements between Russian and Jordanian customs and health authorities, strengthening institutional ties between the nations. Patrushev emphasized Russia's interest in deepening strategic cooperation and implementing mutually beneficial projects, describing the traditionally friendly relationship between the two countries as the foundation for future development. The intergovernmental commission, which has operated since 2013, represents a formal mechanism for coordinating economic and technical collaboration, with the previous meeting held in February 2022 via videoconference. This engagement demonstrates Russia's effort to maintain and expand economic partnerships in the Middle East amid broader geopolitical developments.",
+            "link": "http://government.ru/en/news/59840/",
+            "firstSeenAt": "2026-09-11T23:01:17.442Z"
+          }
+        ]
+      }
+    ]
+  },
+  "jewish": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:04.710Z",
+    "items": [
+      {
+        "source": "JTA",
+        "title": "Police investigating threats against prominent Munich Holocaust survivor and AfD opponent",
+        "link": "https://www.jta.org/2026/09/15/global/police-investigating-threats-against-prominent-munich-holocaust-survivor-and-afd-opponent",
+        "summary": "German police are investigating death threats against 93-year-old Holocaust survivor Charlotte Knobloch, a prominent critic of the far-right AfD party, after graffiti threatening her life was discovered in a Munich park following the AfD's strong electoral performance. The incident, categorized as incitement to hatred and property damage, is notable because antisemitic threats have rarely been so directly connected to a specific political party and individual target. Separately, a woman wearing a Star of David was attacked in Berlin by men who made antisemitic remarks, highlighting a broader pattern of antisemitic incidents in Germany that have risen significantly since October 2023.",
+        "firstSeenAt": "2026-09-15T11:02:04.710Z"
+      },
+      {
+        "source": "JTA",
+        "title": "Neo-Nazi and anti-Muslim protesters clashed outside 9/11 memorial",
+        "link": "https://www.jta.org/2026/09/14/ny/neo-nazi-and-anti-muslim-protesters-clashed-outside-9-11-memorial",
+        "summary": "I'm unable to summarize this article as the text provided contains only subscription prompts and website navigation elements rather than the actual news content. To provide an accurate summary, I would need the full article text describing what happened during the protest clash.",
+        "firstSeenAt": "2026-09-14T23:01:22.606Z"
+      },
+      {
+        "source": "JTA",
+        "title": "Robert Kraft pushes Ed Sheeran to drop Macklemore from tour following ‘Free Palestine’ controversy",
+        "link": "https://www.jta.org/2026/09/14/culture/robert-kraft-pushes-ed-sheeran-to-drop-macklemore-from-tour-following-free-palestine-controversy",
+        "summary": "Robert Kraft, owner of Gillette Stadium, confirmed he pressured Ed Sheeran to drop rapper Macklemore from his tour after Macklemore made pro-Palestinian statements and accusations of Israeli genocide during a recent concert performance. Kraft stated the decision was based on what he characterized as antisemitic rhetoric and hate speech, though he emphasized his objection was not to advocacy for Palestinians themselves. Macklemore disputed this characterization, saying his statements were political commentary about Gaza casualties and accusing critics of weaponizing antisemitism accusations to silence his speech.",
+        "firstSeenAt": "2026-09-14T23:01:22.606Z"
+      },
+      {
+        "source": "The Times of Israel",
+        "title": "Israelis are feeling economic anxiety. Why aren’t politicians talking about it?",
+        "link": "https://www.timesofisrael.com/israelis-are-feeling-economic-anxiety-why-arent-politicians-talking-about-it/",
+        "summary": "Voters say they care about kitchen-table issues at a time of rising costs. But in the wake of Israel's worst catastrophe, and amid political polarization, experts say the path to victory, as always, runs through matters of war and peace.",
+        "firstSeenAt": "2026-09-15T11:02:04.710Z"
+      },
+      {
+        "source": "The Times of Israel",
+        "title": "Iraq’s future murky as pro-Iran militias likely to retain arms after US pullout",
+        "link": "https://www.timesofisrael.com/iraqs-future-murky-as-pro-iran-militias-likely-to-retain-arms-after-us-pullout/",
+        "summary": "Baghdad initially tied US withdrawal, scheduled for Sept. 30, to disarmament, but Tehran-backed groups are refusing to give up weapons until talks are held, after forces leave",
+        "firstSeenAt": "2026-09-15T11:02:04.710Z"
+      },
+      {
+        "source": "The Jerusalem Post",
+        "title": "Panama-flagged oil tanker attacked in Strait of Hormuz, two crew members still missing",
+        "link": "https://www.jpost.com/middle-east/article-908664",
+        "summary": "A Panama-flagged oil tanker was attacked in the Strait of Hormuz, resulting in a fire in its engine room that forced the evacuation of 23 crew members, with two remaining missing. The United States Central Command attributed the incident to strikes by Iranian missiles and drones, while Iran's Islamic Revolutionary Guard Corps claimed the fire resulted from a collision with mines. The attack highlights ongoing tensions in a critical shipping corridor, with India coordinating search and rescue efforts for its missing crew members.",
+        "firstSeenAt": "2026-09-15T11:02:04.710Z"
+      },
+      {
+        "source": "The Jerusalem Post",
+        "title": "Syrian authorities arrested Aleppo woman for practicing 'witchcraft and sorcery' in video",
+        "link": "https://www.jpost.com/middle-east/article-908666",
+        "summary": "Syrian authorities arrested a woman in Aleppo after a video circulating online allegedly showed her practicing sorcery or witchcraft, with security forces stating the investigation aims to curb fraudulent practices and exploitation of citizens. The incident reflects a broader pattern in Syria where women have been killed or persecuted over witchcraft accusations, particularly affecting religious minority groups like Yezidis who have historically faced persecution on such charges. The arrest occurs amid recent political changes in Syria, including the removal of certain groups from terrorist designations and the provision of sanctions relief by Western nations.",
+        "firstSeenAt": "2026-09-15T11:02:04.710Z"
+      }
+    ]
+  },
+  "catholic": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:12.408Z",
+    "items": [
+      {
+        "source": "Vatican News",
+        "title": "Pope's Alma Mater reveals first Pope Leo XIV Sustainability Medal recipient",
+        "link": "https://www.vaticannews.va/en/vatican-city/news/2026-09/pope-s-alma-mater-reveals-first-ever-pope-leo-xiv-sustainabili.html",
+        "summary": "Villanova University has announced Cardinal Michael Czerny as the first recipient of the newly established Pope Leo XIV Sustainability Medal, which recognizes leaders whose work integrates environmental protection, social justice, and economic stewardship. The medal, created by Pope Leo XIV's alma mater and presented biennially at the university's International Sustainability Conference, honors Czerny's decades of work advancing human dignity and environmental stewardship. The inaugural medal will be officially presented in October 2026 during a conference in Rome focused on addressing ecological degradation and social inequality.",
+        "firstSeenAt": "2026-09-14T23:01:32.261Z"
+      },
+      {
+        "source": "Vatican News",
+        "title": "Cardinal Farrell: Rekindling hope in a young person takes humanity a step forward",
+        "link": "https://www.vaticannews.va/en/vatican-city/news/2026-09/cardinal-farrell-world-youth-day-seoul-2027-young-people-faith.html",
+        "summary": "Cardinal Kevin Farrell, the Prefect of the Dicastery for Laity, Family and Life, addressed delegates at a preparatory meeting for World Youth Day Seoul 2027, emphasizing that rekindling hope in young people through the Church's mission contributes to human progress and reconciliation. He noted that many young people today struggle with confusion and emptiness, and that the Church's role is to encourage them to look toward Christ and the cross as symbols of God's love and universal reconciliation. With the event scheduled for August 2027, the Cardinal highlighted how World Youth Day demonstrates that divisions and prejudices can be overcome when young people of different cultures unite in faith.",
+        "firstSeenAt": "2026-09-14T23:01:32.261Z"
+      },
+      {
+        "source": "Vatican News",
+        "title": "Pope: A library is not just place of books but of relationships and exchange",
+        "link": "https://www.vaticannews.va/en/pope/news/2026-09/pope-library-not-just-place-of-books-but-of-relationship-exchang.html",
+        "summary": "Pope Leo XIV visited the Vatican's Apostolic Archives and Library, where he inaugurated an exhibition while emphasizing the institutions' vital role in preserving and sharing knowledge for the benefit of the Church and humanity. He described a library not merely as a repository of books but as a living center of relationships and exchange, using the metaphor of a beating heart with systole and diastole movements to represent both the quiet, contemplative aspect and the outward sharing of its treasures. The Pope also announced plans to address the institutions' need for additional space and called on staff to continue their tradition of cultural openness and reconciliation.",
+        "firstSeenAt": "2026-09-14T23:01:32.261Z"
+      },
+      {
+        "source": "Catholic News Agency",
+        "title": "‘Daniel and the Fiery Furnace’ brings biblical story of faith under pressure to big screen",
+        "link": "https://www.ewtnnews.com/world/us/daniel-and-the-fiery-furnace-brings-biblical-story-of-faith-under-pressure-to-big-screen",
+        "summary": "A new biblical drama titled \"Daniel and the Fiery Furnace\" starring Mena Massoud will release in theaters on September 18, depicting the story of the prophet Daniel and three men who refused to worship a Babylonian king despite threats of death. The film, directed by brothers Matthew and Daniel Kooman, was funded through a successful crowdfunding campaign that raised $1.2 million and emphasizes themes of faith under pressure and spiritual refinement through adversity. The filmmakers aimed to tell an origin story of young men facing intense challenges while remaining faithful to scriptural accounts and the film's central message that hardship refines rather than tests one's faith.",
+        "firstSeenAt": "2026-09-15T11:02:12.408Z"
+      },
+      {
+        "source": "Catholic News Agency",
+        "title": "Study: Doctors don’t screen for abortion coercion — and it hurts women",
+        "link": "https://www.ewtnnews.com/world/us/study-doctors-don-t-screen-for-abortion-coercion-and-it-hurts-women",
+        "summary": "A recent study published in the Journal of the Alliance for Hippocratic Medicine found that abortion providers rarely screen patients for coercion or pressure to abort, despite research indicating that coerced abortion is a significant risk factor for negative mental health and quality-of-life outcomes. The study's authors characterized the failure to screen for coercion as medical negligence and argued that informed consent requires physicians to evaluate women for risk factors and disclose potential harms. Pro-life advocates cited the research as evidence that a substantial portion of abortions may be unwanted and called for increased screening protocols and pre-abortion counseling to help women consider alternatives.",
+        "firstSeenAt": "2026-09-15T11:02:12.408Z"
+      },
+      {
+        "source": "Catholic News Agency",
+        "title": "Sainthood cause for Virginia farmer who saved his son moves forward",
+        "link": "https://www.ewtnnews.com/world/us/sainthood-cause-for-virginia-farmer-who-saved-his-son-moves-forward",
+        "summary": "The Diocese of Arlington has advanced the sainthood cause of Tom Vander Woude, a Virginia farmer who died in 2008 while saving his teenage son Joseph from a septic tank by pushing him toward safety before succumbing to toxic fumes himself. The diocese is now in the information-gathering stage, collecting writings and documents about Vander Woude to assess his candidacy, with church officials emphasizing that his cause rests not only on his heroic final act but also on his daily faithfulness as a husband, father, and man of faith throughout his life. The advancement represents a significant step in the formal Catholic Church process toward potential sainthood, driven by advocacy from Vander Woude's family and supporters.",
+        "firstSeenAt": "2026-09-14T23:01:32.261Z"
+      },
+      {
+        "source": "USCCB",
+        "title": "Pope Leo XIV Accepts Resignation of Bishop Francis Malone of Shreveport and Appoints Bishop Robert Marshall as Apostolic Administrator",
+        "link": "https://www.usccb.org/news/2026/pope-leo-xiv-accepts-resignation-bishop-francis-malone-shreveport-and-appoints-bishop",
+        "summary": "Pope Leo XIV has accepted the resignation of 76-year-old Bishop Francis Malone from his position leading the Diocese of Shreveport, Louisiana. Bishop Robert Marshall of Alexandria has been appointed as Apostolic Administrator to oversee the diocese temporarily until a new permanent bishop is selected and installed. The announcement was made on September 15, 2026, by the papal nuncio to the United States.",
+        "firstSeenAt": "2026-09-15T11:02:12.408Z"
+      }
+    ]
+  },
+  "islamic": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:11.346Z",
+    "items": [
+      {
+        "source": "Al Jazeera English",
+        "title": "Nairobi to host World Athletics Championships in 2029",
+        "link": "https://www.aljazeera.com/sports/2026/9/15/nairobi-to-host-world-athletics-championships-in-2029?traffic_source=rss",
+        "summary": "Nairobi has been selected to host the World Athletics Championships in 2029, making it the first African city to host the event and beating bids from London, Munich, and Rome. World Athletics officials stated that the decision allows the championships to be held across Asia, Africa, and Europe over the next three editions, with Beijing hosting in 2027 and Munich in 2031. Kenya's capital was chosen based on its compelling bid, the renovated Kasarani Stadium, and its demonstrated commitment to developing athletics across the continent.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      },
+      {
+        "source": "Al Jazeera English",
+        "title": "UN experts say Belarus justice system used to target Lukashenko opponents",
+        "link": "https://www.aljazeera.com/news/2026/9/15/un-experts-say-belarus-justice-system-used-to-target-lukashenko-opponents?traffic_source=rss",
+        "summary": "United Nations experts have concluded that Belarus's state institutions, including courts, police, security services, and prosecutors, have systematically worked together to repress government critics and opponents of President Alexander Lukashenko since 2020 through arrests, imprisonment, torture, and surveillance. The report documents widespread human rights violations including arbitrary arrests, denial of legal safeguards, and closed trials, with the judiciary playing a key role in legitimizing abuses. Belarus rejected cooperation with the UN investigators, and experts found that some abuses may constitute crimes against humanity, while human rights groups estimate over 900 political prisoners remain detained in the country.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      },
+      {
+        "source": "Al Jazeera English",
+        "title": "US Supreme Court rejects Trump’s plans on postal ballots: Why it matters",
+        "link": "https://www.aljazeera.com/news/2026/9/15/us-supreme-court-rejects-trumps-plans-on-postal-ballots-why-it-matters?traffic_source=rss",
+        "summary": "The U.S. Supreme Court has rejected Donald Trump's attempt to restrict mail-in voting ahead of the November midterm elections, allowing states to continue sending ballots as they have for years. Trump had pushed an executive order requiring new ballot envelope standards and federal control over mail voting, claiming such measures were necessary to prevent fraud, though election security experts have found mail-in voting fraud to be extremely rare. The ruling represents a significant defeat for Trump's efforts to change voting rules, as it halts potential last-minute legal challenges and prevents implementation of the new requirements before voting begins in several states.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      },
+      {
+        "source": "MuslimMatters.org",
+        "title": "Far Away [Part 27] – The Prince’s Ring",
+        "link": "https://muslimmatters.org/2026/09/14/far-away-27-the-princes-ring/?utm_source=rss&#038;utm_medium=rss&#038;utm_campaign=far-away-27-the-princes-ring",
+        "summary": "This article is part 27 of a serialized fiction story titled \"Far Away,\" following a character named Darius who visits a Persian palace after months of travel. The narrative focuses on Darius reflecting on his personal journey and spiritual growth while touring the palace gardens with fellow guards before meeting with a prince. The story explores themes of faith, transformation, and finding purpose through a character who has evolved from loneliness and desperation into a stronger, more spiritually grounded individual.",
+        "firstSeenAt": "2026-09-14T23:01:26.651Z"
+      },
+      {
+        "source": "Middle East Eye",
+        "title": "Oman tows oil tanker attacked off its coast, two crew missing",
+        "link": "https://www.middleeasteye.net/live-blog/live-blog-update/oman-tows-oil-tanker-attacked-its-coast-two-crew-missing",
+        "summary": "An oil tanker flying a Panama flag was attacked off Oman's coast, resulting in a fire in its engine room and forcing the evacuation of 23 crew members by Omani naval forces. The vessel is being towed to an Omani port, though two crew members remain missing from the incident that occurred approximately 103 nautical miles northeast of Musandam.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      },
+      {
+        "source": "Middle East Eye",
+        "title": "UK considers military support for Saudis against Houthis, report says",
+        "link": "https://www.middleeasteye.net/news/uk-considers-military-support-saudis-against-houthis-report-says",
+        "summary": "The British government is considering providing military and diplomatic support to Saudi Arabia following recent Houthi advances in Yemen near the strategically important Bab el-Mandeb Strait and attacks on oil infrastructure. The Houthis' control of this Red Sea chokepoint threatens global shipping and energy supplies, prompting British officials to advise that military advisors be sent to assist Saudi Arabia, with the UK Foreign Secretary expressing firm support for the kingdom. The situation has raised oil prices and created economic concerns for Britain due to potential disruptions to international energy markets and shipping routes.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      },
+      {
+        "source": "Middle East Eye",
+        "title": "UKMTO: Vessel struck by unknown projectile in Hormuz",
+        "link": "https://www.middleeasteye.net/live-blog/live-blog-update/ukmto-vessel-struck-unknown-projectile-hormuz",
+        "summary": "A vessel was struck by an unknown projectile in the Strait of Hormuz on Monday, according to the UK Maritime Trade Operations authority. No damage or environmental impact was reported from the incident, and authorities initiated an investigation into the cause of the strike.",
+        "firstSeenAt": "2026-09-15T11:02:11.346Z"
+      }
+    ]
+  },
+  "hindu": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:09.388Z",
+    "items": [
+      {
+        "source": "Hindu Press International",
+        "title": "Hindu Fight Back Against Missionary Incursions Into Jaffna Under British Colonial Rule",
+        "link": "https://www.hinduismtoday.com/hpi/2026/09/13/hindu-fight-back-against-missionary-incursions-into-jaffna-under-british-colonial-rule/",
+        "summary": "During British colonial rule in Jaffna, Sri Lanka, the Hindu community mounted a peaceful resistance movement against Christian missionary conversion efforts by adopting the missionaries' own tactics of institutional organization, education, and media. Led by scholar Arumuga Navalar, who leveraged his knowledge of Christian theology gained through missionary schooling, the movement established a printing press in 1842 and a structured Hindu school in 1848, alongside a temple reconstruction campaign. By the late 19th century, these efforts had significantly countered the impact of colonial evangelism in northern Sri Lanka.",
+        "firstSeenAt": "2026-09-13T23:01:23.815Z"
+      },
+      {
+        "source": "Hindu Press International",
+        "title": "Nationalism of Two Kinds Threatens Sri Lanka’s Christians",
+        "link": "https://www.hinduismtoday.com/hpi/2026/09/13/nationalism-of-two-kinds-threatens-sri-lankas-christians/",
+        "summary": "Sri Lanka's Christian minority faces increasing persecution from two distinct nationalist movements: the established Sinhala-Buddhist campaigns and a growing Tamil-Hindu nationalist movement gaining organizational support from India's Hindu right. Research from think tanks and religious freedom monitors, corroborated by Sri Lanka's National Christian Evangelical Alliance, documents how Hindu nationalist organizations such as Siva Senai, Rudra Sena, and Ravana Sena have built grassroots influence in Tamil-majority regions since 2016, with direct ties to Indian Hindu nationalist groups. This convergence of competing nationalisms creates a particularly precarious environment for Tamil-Hindu converts to Christianity.",
+        "firstSeenAt": "2026-09-13T23:01:23.815Z"
+      },
+      {
+        "source": "Hindu Press International",
+        "title": "Siva Temple Collapses into Ganga River",
+        "link": "https://www.hinduismtoday.com/hpi/2026/09/08/siva-temple-collapses-into-ganga-river/",
+        "summary": "A small concrete Siva Temple located on the banks of the Ganga River in Bengal, India collapsed into the river on September 7, 2026, after prolonged erosion of the riverbank beneath it. The temple disappeared within minutes as devotees watched and chanted. The incident highlights the ongoing environmental challenge of riverbank erosion affecting structures in the region.",
+        "firstSeenAt": "2026-09-08T11:01:24.165Z"
+      },
+      {
+        "source": "Hindu American Foundation",
+        "title": "When Kerala is Home",
+        "link": "https://www.hinduamerican.org/blog/when-kerala-is-home",
+        "summary": "The article is a personal essay about the author's summer visit to their ancestral home in Kerala, India, where they reconnected with Hindu culture and traditions through activities like visiting temples, learning about local plants and food preparation, and experiencing Ayurvedic treatments. The piece describes various aspects of Kerala life including temple visits to sites associated with Adi Shankaracharya, traditional food practices, harvesting and processing jackfruit, and the role of these experiences in maintaining cultural roots and spiritual connection. The author reflects on how visiting their homeland provides a deeper understanding of Hindu practices and the importance of maintaining cultural heritage for diaspora communities.",
+        "firstSeenAt": "2026-08-28T11:35:10.465Z"
+      },
+      {
+        "source": "Hindu American Foundation",
+        "title": "America at 250: Hinduism’s hidden place in its founding",
+        "link": "https://www.hinduamerican.org/blog/america-at-250-hinduisms-hidden-place-in-its-founding",
+        "summary": "The article argues that Hindu philosophy and legal traditions influenced America's founding principles, particularly through Deist thought that prioritized universal morality over sectarian doctrine, as evidenced by the Founders' familiarity with translated Hindu law codes and Thomas Jefferson's explicit mention of protecting Hindus under religious freedom statutes. The piece contends that Hindus have been historically overlooked in narratives of American creation despite their intellectual contributions to the nation's foundational ideals, a gap the author suggests becomes relevant as America prepares to celebrate its 250th anniversary in 2026.",
+        "firstSeenAt": "2026-08-28T11:35:10.465Z"
+      },
+      {
+        "source": "ISKCON News",
+        "title": "Registration Still Open for 2026 MAN-tra Retreat at New Vrindaban",
+        "link": "https://iskconnews.org/registration-still-open-for-2026-man-tra-retreat-at-new-vrindaban/",
+        "summary": "Registration is currently open for the 2026 MAN-tra Retreat, a spiritual retreat for devotee men scheduled for October 2-4 at ISKCON New Vrindaban in West Virginia, featuring seminars on topics like men's emotional wellness, listening skills, and grief management alongside kirtan, drama performances, and fellowship. The retreat, founded to help men integrate spiritual practice into their daily lives and relationships, offers shared and single-occupancy room options at varying price points, with registration available through the MAN-tra website.",
+        "firstSeenAt": "2026-09-14T23:01:26.762Z"
+      },
+      {
+        "source": "ISKCON News",
+        "title": "Radhika Das Leads Kirtan at UK’s Medicine Festival",
+        "link": "https://iskconnews.org/radhika-das-leads-kirtan-at-uks-medicine-festival/",
+        "summary": "Radhika Das led kirtan, a form of call-and-response devotional chanting, at Medicine Festival 2026 in England from August 12-17, introducing approximately 10,000 festivalgoers to Vaishnava congregational chanting. The performance, accompanied by harmonium, percussion, and other musicians, featured an extended \"Radhe Govinda\" kirtan on August 15 that built energy as audience members joined in singing and dancing. The appearance was part of the festival's broader programming of sacred music, healing arts, and cross-cultural exchange.",
+        "firstSeenAt": "2026-09-12T23:01:39.302Z"
+      }
+    ]
+  },
+  "buddhist": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:02:12.718Z",
+    "items": [
+      {
+        "source": "Lion’s Roar",
+        "title": "Ronny Chieng Is Learning Every Day",
+        "link": "https://www.lionsroar.com/ronny-chieng-post/",
+        "summary": "Comedian and Daily Show host Ronny Chieng discussed connections between satire and Buddhist teachings in an interview ahead of his tour \"Hassan Hates Ronny.\" The interview was published in a special edition of a Buddhist publication featuring perspectives from Asian American Buddhist voices and teachers.",
+        "firstSeenAt": "2026-09-14T23:01:29.207Z"
+      },
+      {
+        "source": "Lion’s Roar",
+        "title": "Going on 94, and Still Waking Up",
+        "link": "https://www.lionsroar.com/going-on-94-and-still-waking-up/",
+        "summary": "Approaching age 94, Buddhist dharma teacher Larry Rosenberg reflects on how decades of meditative practice have fundamentally changed his relationship with aging, illness, and mortality. Rather than eliminating suffering, his practice has taught him how to remain present and aware when difficulties arise, allowing him to manage pain and fear through mindfulness rather than being overwhelmed by anxious thoughts about the future. Rosenberg emphasizes that consistent spiritual practice, especially when one is young, cultivates the mental stability needed to face life's inevitable challenges with equanimity and without helplessness.",
+        "firstSeenAt": "2026-09-14T23:01:29.207Z"
+      },
+      {
+        "source": "Lion’s Roar",
+        "title": "A Prayer for Nepal and Tibet, and How to Help",
+        "link": "https://www.lionsroar.com/a-prayer-for-nepal-and-tibet-and-how-to-help/",
+        "summary": "A devastating flash flood caused by a glacier collapse on August 26th killed over 350 people in Nepal and Tibet, with hundreds more missing, many of whom were pilgrims traveling to sacred mountain and lake sites. Religious leaders including the Dalai Lama have offered prayers and condolences while pointing to climate change as a potential underlying cause. The article provides information about established relief organizations through which people can donate, cautioning against giving through social media fundraisers due to scam risks.",
+        "firstSeenAt": "2026-09-01T23:01:29.795Z"
+      },
+      {
+        "source": "Tricycle",
+        "title": "Learning to Die Each Day",
+        "link": "https://tricycle.org/article/sister-dang-nghiem-grief/",
+        "summary": "A Plum Village nun reflects on how contemplating mortality awakened her to life's inherent beauty and meaning after her partner John drowned unexpectedly. The piece describes her spiritual journey from a depressed young doctor through a transformative retreat led by Buddhist teacher Thich Nhat Hanh, and how the sudden loss of her partner catalyzed her decision to renounce medicine and commit fully to monastic life. The author argues that remembering our inevitable death need not lead to despair but can instead deepen our appreciation for the present moment and our connections to others.",
+        "firstSeenAt": "2026-09-15T11:02:12.718Z"
+      },
+      {
+        "source": "Tricycle",
+        "title": "Only Suffering and the Cessation of Suffering",
+        "link": "https://tricycle.org/article/only-suffering-thanissaro-bhikkhu/",
+        "summary": "A Theravada monk examines how the grammatical interpretation of a single Pali word changes the meaning of the Buddha's foundational teaching about his focus on suffering and its cessation. The traditional translation emphasizes that the Buddha taught \"only\" suffering and the end of suffering, limiting his scope to the Four Noble Truths, but recent scholars have argued the grammar suggests he simply taught both suffering and its cessation among other things. However, a careful examination of other uses of the same grammatical construction in the Pali canon reveals it can mean either \"both and\" or \"only and\" depending on context, and analyzing the specific contexts of the Buddha's statements suggests the exclusive interpretation aligns with his known refusal to address certain metaphysical questions.",
+        "firstSeenAt": "2026-09-14T11:01:18.492Z"
+      },
+      {
+        "source": "Tricycle",
+        "title": "The Holes in the Leaves",
+        "link": "https://tricycle.org/article/cat-shteynberg-interbeing/",
+        "summary": "A cancer survivor recovering from chemotherapy and radiation reflects on her identity and mortality by observing the lifecycle of Gulf fritillary caterpillars on a passionflower vine in her garden. Drawing parallels between the caterpillars' transformation and her own journey through treatment and disability, she contemplates how toxic compounds that harm most creatures become protective for the caterpillars, much as chemotherapy damages her body while potentially extending her life. The essay explores themes of impermanence, interdependence, and acceptance of uncertainty as her tumor shows signs of growth again and she faces the possibility of future treatment.",
+        "firstSeenAt": "2026-09-13T11:01:57.582Z"
+      }
+    ]
+  },
+  "goodnews": {
+    "status": "ok",
+    "updatedAt": "2026-09-15T11:01:39.835Z",
+    "items": [
+      {
+        "source": "Good News Network",
+        "title": "Good News in History September 15",
+        "link": "https://www.goodnewsnetwork.org/events060915/",
+        "summary": "Many happy returns to a brilliant Brit, Tom Hardy, who turns 49 years old today. The London actor got his start in Ridley Scott’s Black Hawk Down, and preceded along a course of action and adventure films to rival any actor of the 21st century, including Inception, Dark Knight Rises, and Mad Max: Fury Road. The charismatic Londoner…",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "How Afghan Women Are Rebuilding Reproductive Health Care",
+        "link": "https://reasonstobecheerful.world/how-afghan-women-are-rebuilding-reproductive-health-care/",
+        "summary": "In Helmand province in southern Afghanistan, Ram Bibi, a 30-year-old mother now pregnant with her sixth child, counts herself as one of the lucky ones. She gets regular prenatal checkups at the Qari Safed family health house not far from her home. Here, midwife Marzia screens her for anemia, provides...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "With Adapted Sailing, the Sea Is for Everyone",
+        "link": "https://reasonstobecheerful.world/adapted-sailing-school/",
+        "summary": "César Maquieira has always loved the sea. Born and raised in the northwest of Spain, much of which is bordered by the Atlantic Ocean, he would for years regularly go fishing and on boat trips, and he dabbled in scuba diving. There was something about the great expanse of azure...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "‘We Held Each Other Up’",
+        "link": "https://reasonstobecheerful.world/we-held-each-other-up/",
+        "summary": "This week in our New York City office, we found ourselves talking about what we remembered from 25 years ago: the darkness, the sadness — and the ways people cared for one another. Our managing director, Rebecca Faulkner, is an award-winning poet and proud transplant to New York. We asked...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "The ‘National Park’ That Stretches From Coast to Coast",
+        "link": "https://reasonstobecheerful.world/the-national-park-that-stretches-from-coast-to-coast/",
+        "summary": "On Doug Tallamy’s 10-acre property in rural Pennsylvania, the evidence arrives on wings. Wood thrushes now nest in shrubs that were once cut for hay. Luna moths — emerald-green giants that had become increasingly rare — have reached record numbers. Tallamy recounts enthusiastically that he has documented more than 1,380...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "What We’re Reading: What If You Could Opt Out of Algorithms?",
+        "link": "https://reasonstobecheerful.world/what-were-reading-australia-says-algorithms-optional/",
+        "summary": "Welcome back to our weekly behind-the-scenes glimpse at what’s getting our team talking. Tell us what you’ve been reading at info@reasonstobecheerful.world and we just might feature it here. Safe scrolling In December, Australia became the first country in the world to ban children under 16 from holding social media accounts...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      },
+      {
+        "source": "Reasons to Be Cheerful",
+        "title": "Beavers Are Having a Moment",
+        "link": "https://reasonstobecheerful.world/beavers-big-moment/",
+        "summary": "Over the last 20 years, Oregon’s wilderness has suffered big time. Salmon have disappeared, wildfires have scoured the hills and drought has parched once-fertile soils. Years of small fixes — a little forest thinning here, a little fish-ladder installation there — have helped, but not nearly enough to keep up...",
+        "firstSeenAt": "2026-09-15T11:01:39.835Z"
+      }
+    ]
+  }
+}
